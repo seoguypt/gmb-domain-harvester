@@ -22,9 +22,9 @@ serve(async (req) => {
 
     console.log(`Fetching domain rating for ${domain}`)
 
-    // The correct endpoint for Ahrefs API v3
+    // Using the correct Ahrefs API endpoint for domain rating
     const response = await fetch(
-      `https://api.ahrefs.com/v3/domain-metrics?target=${encodeURIComponent(domain)}&metrics=domain_rating`,
+      `https://api.ahrefs.com/v3/site-explorer/overview?target=${encodeURIComponent(domain)}&metrics=domain_rating`,
       {
         headers: {
           'Accept': 'application/json',
