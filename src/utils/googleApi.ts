@@ -1,5 +1,11 @@
 import { Loader } from "@googlemaps/js-api-loader";
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 let placesService: google.maps.places.PlacesService | null = null;
 
 export const initGoogleMapsApi = async () => {
