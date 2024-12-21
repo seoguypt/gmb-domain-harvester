@@ -19,8 +19,11 @@ serve(async (req) => {
       )
     }
 
+    // Get current date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0]
+
     const response = await fetch(
-      `https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}`,
+      `https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}&date=${today}`,
       {
         headers: {
           'Accept': 'application/json',
@@ -31,6 +34,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text()
+      console.error('Ahrefs API error response:', errorText)
       throw new Error(`Ahrefs API error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
@@ -43,6 +47,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error('Edge function error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
