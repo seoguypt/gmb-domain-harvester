@@ -1,15 +1,7 @@
-import { Loader } from "@googlemaps/js-api-loader";
-
-type Library = "places" | "drawing" | "geometry" | "localContext" | "visualization";
-
-export interface GoogleMapsConfig {
-  apiKey: string;
-  version: string;
-  libraries: Library[];
-}
+import { Loader, LoaderOptions } from "@googlemaps/js-api-loader";
 
 export const createGoogleMapsLoader = (apiKey: string): Loader => {
-  const config: GoogleMapsConfig = {
+  const config: LoaderOptions = {
     apiKey,
     version: "weekly",
     libraries: ["places"]

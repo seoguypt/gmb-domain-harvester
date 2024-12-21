@@ -1,9 +1,9 @@
-type Library = "places" | "drawing" | "geometry" | "localContext" | "visualization";
+import type { Libraries } from "@googlemaps/js-api-loader";
 
 export interface GoogleMapsConfig {
   apiKey: string;
   version: string;
-  libraries: Library[];
+  libraries: Libraries;
 }
 
 export interface GMBListing {
