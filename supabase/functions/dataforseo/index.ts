@@ -37,6 +37,8 @@ serve(async (req) => {
       )
     }
 
+    console.log('Calling DataForSEO API for domain:', domain)
+
     const auth = btoa(`${DATAFORSEO_LOGIN}:${DATAFORSEO_PASSWORD}`)
     
     const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/domain/overview', {
@@ -48,19 +50,30 @@ serve(async (req) => {
       body: JSON.stringify([{ target: domain }])
     })
 
+    if (!response.ok) {
+      console.error('DataForSEO API error:', await response.text())
+      throw new Error(`DataForSEO API returned ${response.status}`)
+    }
+
     const data = await response.json()
     console.log('DataForSEO response:', data)
 
     return new Response(
       JSON.stringify(data),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        }
       }
     )
   } catch (error) {
     console.error('Error in DataForSEO function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
