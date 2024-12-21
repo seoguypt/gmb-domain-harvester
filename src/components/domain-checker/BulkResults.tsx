@@ -52,7 +52,7 @@ export function BulkResults({ results }: BulkResultsProps) {
                           <Star className="h-4 w-4 text-muted-foreground" />
                           <span>{result.listing.rating} / 5.0</span>
                         </div>
-                        {result.listing.matchType === 'name' && result.listing.websiteUrl && (
+                        {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
                           <div className="flex items-center gap-2">
                             <Globe className="h-4 w-4 text-muted-foreground" />
                             <a 
