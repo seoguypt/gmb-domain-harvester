@@ -54,7 +54,8 @@ export const searchGMBListing = (domain: string): Promise<GMBListing | null> => 
                   rating: place.rating || 0,
                   placeId: placeId,
                   matchType: websiteMatch ? "website" : "name",
-                  websiteUrl: place.website || undefined
+                  websiteUrl: place.website || undefined,
+                  type: place.types?.[0]
                 });
               } else {
                 console.log('No match - criteria not met');

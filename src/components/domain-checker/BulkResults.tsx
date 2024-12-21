@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link } from 'lucide-react';
+import { Building2, MapPin, Star, Link, Globe } from 'lucide-react';
 import type { DomainResult } from "@/utils/google/types";
+import { domainsMatch } from "@/utils/google/domainUtils";
 
 interface BulkResultsProps {
   results: DomainResult[];
@@ -51,6 +52,19 @@ export function BulkResults({ results }: BulkResultsProps) {
                           <Star className="h-4 w-4 text-muted-foreground" />
                           <span>{result.listing.rating} / 5.0</span>
                         </div>
+                        {result.listing.matchType === 'name' && result.listing.websiteUrl && (
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-muted-foreground" />
+                            <a 
+                              href={result.listing.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              {result.listing.websiteUrl}
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </HoverCardContent>
                   </HoverCard>
