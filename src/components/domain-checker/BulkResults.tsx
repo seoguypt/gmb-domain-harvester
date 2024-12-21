@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link, Calendar, Building, Clock, Globe, Users, ArrowUpRight } from 'lucide-react';
+import { Building2, MapPin, Star, Link } from 'lucide-react';
 import type { DomainResult } from "@/utils/google/types";
 
 interface BulkResultsProps {
@@ -16,9 +16,7 @@ export function BulkResults({ results }: BulkResultsProps) {
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
             <TableHead>Match Type</TableHead>
-            <TableHead>Registration</TableHead>
-            <TableHead>Domain Metrics</TableHead>
-            <TableHead>Backlinks</TableHead>
+            <TableHead>Domain Age</TableHead>
             <TableHead>SEO Performance</TableHead>
           </TableRow>
         </TableHeader>
@@ -75,45 +73,9 @@ export function BulkResults({ results }: BulkResultsProps) {
                 )}
               </TableCell>
               <TableCell>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>Registered: {result.domainAge || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Building className="h-4 w-4 text-muted-foreground" />
-                    <span>Registrar: {result.registrar || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>Expires: {result.expiryDate || 'N/A'}</span>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    <span>TLD: {result.tld || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>Status: {result.registered ? 'Active' : 'Inactive'}</span>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="font-medium">Referring Domains:</span> {result.backlinksInfo?.referringDomains || 'N/A'}
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Total Backlinks:</span> {result.backlinksInfo?.backlinks || 'N/A'}
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Dofollow Links:</span> {result.backlinksInfo?.dofollow || 'N/A'}
-                  </div>
-                </div>
+                <span className="text-sm">
+                  {result.domainAge || 'N/A'}
+                </span>
               </TableCell>
               <TableCell>
                 <div className="space-y-2">
