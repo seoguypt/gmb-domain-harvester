@@ -43,20 +43,15 @@ serve(async (req) => {
     
     console.log('Making request to DataForSEO API for domain:', domain);
     
-    // Use the domain analytics id list endpoint
-    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/id_list', {
+    // Use the whois overview endpoint
+    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/whois/overview/live', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify([{
-        datetime_from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ago
-        datetime_to: new Date().toISOString(),
-        limit: 100,
-        offset: 0,
-        sort: "desc",
-        include_metadata: true
+        target: domain
       }])
     });
 
@@ -99,10 +94,10 @@ serve(async (req) => {
 
     // Map API response fields to our expected metrics
     const metrics = {
-      domain_rating: result.metadata?.domain_rank || result.metadata?.trust_score || 0,
-      semrush_rank: result.metadata?.semrush?.rank || result.metadata?.rank_absolute || 0,
-      facebook_shares: result.metadata?.social_metrics?.facebook?.shares || 0,
-      ahrefs_rank: result.metadata?.backlinks?.count || 0
+      domain_rating: result.registrar_info?.domain_rank || result.registrar_info?.trust_score || 0,
+      semrush_rank: result.registrar_info?.rank || result.registrar_info?.alexa_rank || 0,
+      facebook_shares: result.social_metrics?.facebook?.shares || result.social_metrics?.total_shares || 0,
+      ahrefs_rank: result.backlinks_info?.backlinks_count || result.backlinks_info?.referring_domains || 0
     };
 
     console.log('Mapped metrics:', JSON.stringify(metrics, null, 2));
