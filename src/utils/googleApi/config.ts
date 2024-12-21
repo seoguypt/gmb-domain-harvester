@@ -5,7 +5,7 @@ let placesService: google.maps.places.PlacesService | null = null;
 
 const defaultConfig: GoogleMapsConfig = {
   apiKey: "",
-  libraries: ["places"],
+  libraries: ["places"] as google.maps.Libraries,
   version: "weekly"
 };
 

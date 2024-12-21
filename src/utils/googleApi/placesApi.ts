@@ -13,13 +13,11 @@ export const searchGMBListing = (domain: string): Promise<GMBListing | null> => 
     const cleanedName = cleanBusinessName(domain);
     console.log(`Searching for business: "${cleanedName}" (Domain: ${domain})`);
 
-    // Using the new Places API search method
-    const searchRequest: google.maps.places.FindPlaceFromTextRequest = {
+    const searchRequest: google.maps.places.TextSearchRequest = {
       query: cleanedName,
-      fields: ['name', 'formatted_address', 'rating', 'type', 'place_id', 'website']
     };
 
-    placesService.findPlaceFromText(
+    placesService.textSearch(
       searchRequest,
       (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {

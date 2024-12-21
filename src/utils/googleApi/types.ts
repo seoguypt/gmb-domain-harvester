@@ -10,6 +10,6 @@ export interface GMBListing {
 
 export interface GoogleMapsConfig {
   apiKey: string;
-  libraries: string[];
+  libraries: google.maps.Libraries;
   version: string;
 }
