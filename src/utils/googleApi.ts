@@ -76,6 +76,8 @@ export const searchGMBListing = (domain: string): Promise<{
   address: string;
   rating: number;
   type: string;
+  placeId: string;
+  matchType: "website" | "name" | null;
 } | null> => {
   return new Promise((resolve, reject) => {
     if (!placesService) {
@@ -93,7 +95,6 @@ export const searchGMBListing = (domain: string): Promise<{
 
     placesService.textSearch(request, (results, status) => {
       if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
-        // Get more details about the place
         const placeId = results[0].place_id;
         
         placesService.getDetails(
@@ -103,7 +104,6 @@ export const searchGMBListing = (domain: string): Promise<{
           },
           (place, detailsStatus) => {
             if (detailsStatus === google.maps.places.PlacesServiceStatus.OK && place) {
-              // Only return a match if the website domain matches or the names are very similar
               const placeWebsite = place.website?.toLowerCase() || '';
               const domainLower = domain.toLowerCase();
               
@@ -121,6 +121,8 @@ export const searchGMBListing = (domain: string): Promise<{
                   address: place.formatted_address || "",
                   rating: place.rating || 0,
                   type: place.types?.[0] || "Local Business",
+                  placeId: placeId,
+                  matchType: websiteMatch ? "website" : "name"
                 });
               } else {
                 resolve(null);

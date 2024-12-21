@@ -7,6 +7,8 @@ interface GMBListing {
   address: string;
   rating: number;
   type: string;
+  placeId: string;
+  matchType: "website" | "name" | null;
 }
 
 interface BulkResultsProps {
@@ -24,6 +26,7 @@ export function BulkResults({ results }: BulkResultsProps) {
           <TableRow>
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
+            <TableHead>Match Type</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -33,9 +36,16 @@ export function BulkResults({ results }: BulkResultsProps) {
               <TableCell>
                 {result.listing ? (
                   <HoverCard>
-                    <HoverCardTrigger className="flex items-center gap-2 text-primary cursor-pointer">
-                      <Link className="h-4 w-4" />
-                      Yes
+                    <HoverCardTrigger asChild>
+                      <a 
+                        href={`https://search.google.com/local/details?q=${encodeURIComponent(result.listing.businessName)}&place_id=${result.listing.placeId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-primary cursor-pointer hover:underline"
+                      >
+                        <Link className="h-4 w-4" />
+                        Yes
+                      </a>
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <div className="space-y-3">
@@ -61,6 +71,17 @@ export function BulkResults({ results }: BulkResultsProps) {
                   </HoverCard>
                 ) : (
                   <span className="text-muted-foreground">No</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {result.listing?.matchType && (
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    result.listing.matchType === 'website' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {result.listing.matchType === 'website' ? 'Website Match' : 'Name Match'}
+                  </span>
                 )}
               </TableCell>
             </TableRow>
