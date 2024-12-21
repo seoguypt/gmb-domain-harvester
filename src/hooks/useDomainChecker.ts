@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { searchGMBListing } from "@/utils/googleApi";
-import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "../components/ui/use-toast";
+import { searchGMBListing } from "../utils/googleApi";
+import { fetchDomainMetrics } from "../services/dataforseo";
 
 interface GMBListing {
   businessName: string;
@@ -26,44 +26,6 @@ export function useDomainChecker() {
   }[]>([]);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
-
-  const fetchDomainAnalytics = async (domain: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('dataforseo', {
-        body: { domain }
-      });
-
-      if (error || data?.error) {
-        const errorMsg = data?.error || error?.message || 'Unknown error';
-        console.error('DataForSEO API error:', errorMsg);
-        toast({
-          title: "Domain Metrics Error",
-          description: `Failed to fetch metrics: ${errorMsg}`,
-          variant: "destructive",
-        });
-        return null;
-      }
-
-      console.log('DataForSEO function response:', data);
-
-      if (data?.tasks?.[0]?.result?.[0]) {
-        const result = data.tasks[0].result[0];
-        console.log('DataForSEO metrics:', result);
-        
-        // Return metrics from whois overview response
-        return {
-          domain_rating: result.registrar_info?.domain_rank || result.registrar_info?.trust_score || 0,
-          semrush_rank: result.registrar_info?.rank || result.registrar_info?.alexa_rank || 0,
-          facebook_shares: result.social_metrics?.facebook?.shares || result.social_metrics?.total_shares || 0,
-          ahrefs_rank: result.backlinks_info?.backlinks_count || result.backlinks_info?.referring_domains || 0
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('Error calling DataForSEO function:', error);
-      return null;
-    }
-  };
 
   const checkDomains = async (isApiInitialized: boolean) => {
     if (!domains.trim()) {
@@ -98,45 +60,8 @@ export function useDomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
-          const { data: cachedResult } = await supabase
-            .from('domain_checks')
-            .select('*')
-            .eq('domain', domain)
-            .maybeSingle();
-
-          let listing;
-          let metrics = null;
-
-          if (cachedResult) {
-            console.log('Cache hit for domain:', domain);
-            listing = cachedResult.listing;
-            metrics = {
-              domain_rating: cachedResult.domain_rating || 0,
-              semrush_rank: cachedResult.semrush_rank || 0,
-              facebook_shares: cachedResult.facebook_shares || 0,
-              ahrefs_rank: cachedResult.ahrefs_rank || 0
-            };
-          } else {
-            console.log('Cache miss for domain:', domain);
-            listing = await searchGMBListing(domain);
-            metrics = await fetchDomainAnalytics(domain);
-
-            if (listing || metrics) {
-              await supabase
-                .from('domain_checks')
-                .insert({
-                  domain: domain,
-                  listing: listing,
-                  checked_at: new Date().toISOString(),
-                  ...(metrics && {
-                    domain_rating: metrics.domain_rating,
-                    semrush_rank: metrics.semrush_rank,
-                    facebook_shares: metrics.facebook_shares,
-                    ahrefs_rank: metrics.ahrefs_rank
-                  })
-                });
-            }
-          }
+          const listing = await searchGMBListing(domain);
+          const metrics = await fetchDomainMetrics(domain);
           
           newResults.push({ 
             domain, 
