@@ -5,7 +5,12 @@ export const cleanDomain = (domain: string): string => {
   
   const multiPartTlds = [
     'co.uk', 'com.au', 'co.nz', 'co.jp', 'co.in', 
-    'com.br', 'com.mx', 'co.za', 'com.sg', 'com.hk'
+    'com.br', 'com.mx', 'co.za', 'com.sg', 'com.hk',
+    'com.tr', 'co.th', 'com.tw', 'com.cn', 'com.vn',
+    'com.ph', 'com.my', 'com.ar', 'com.pe', 'com.ve',
+    'com.co', 'com.ec', 'com.uy', 'com.py', 'com.bo',
+    'com.gt', 'com.sv', 'com.hn', 'com.ni', 'com.cr',
+    'com.pa', 'com.do', 'org.uk', 'net.au', 'org.au'
   ];
   
   for (const tld of multiPartTlds) {
