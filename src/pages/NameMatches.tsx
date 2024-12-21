@@ -16,7 +16,7 @@ const NameMatches = () => {
         .from('domain_checks')
         .select('*')
         .not('listing', 'is', null)
-        .eq('listing->matchType', 'name')
+        .contains('listing', { matchType: 'name' })
         .order('checked_at', { ascending: false });
 
       if (error) {
