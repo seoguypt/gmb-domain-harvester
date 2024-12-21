@@ -1,22 +1,21 @@
-import { Database, Home, List } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Home, Search, List, Database } from "lucide-react";
 
-export default function MainMenu() {
+export function MainMenu() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="mr-4 hidden md:flex">
-          <Link className="mr-6 flex items-center space-x-2" to="/">
-            <span className="hidden font-bold sm:inline-block">
-              Domain Checker
-            </span>
+    <div className="w-full border-b mb-4">
+      <div className="max-w-6xl mx-auto py-2 px-4">
+        <nav className="flex items-center gap-6">
+          <Link to="/" className="flex items-center font-bold">
+            <Home className="w-4 h-4 mr-2" />
+            GMB Domain Harvester
           </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center text-sm hover:text-primary transition-colors">
-              <Home className="w-4 h-4 mr-2" />
-              Home
+              <Search className="w-4 h-4 mr-2" />
+              Domain Checker
             </Link>
-            <Link to="/name-matches" className="flex items-center text-sm hover:text-primary transition-colors">
+            <Link to="/website-matches" className="flex items-center text-sm hover:text-primary transition-colors">
               <List className="w-4 h-4 mr-2" />
               Name Matches
             </Link>
@@ -24,9 +23,9 @@ export default function MainMenu() {
               <Database className="w-4 h-4 mr-2" />
               Found
             </Link>
-          </nav>
-        </div>
+          </div>
+        </nav>
       </div>
-    </header>
+    </div>
   );
 }
