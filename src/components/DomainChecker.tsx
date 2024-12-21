@@ -2,11 +2,13 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
+import { getDomainAge } from "@/utils/dataForSeo";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
 import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
-import type { GMBListing, DomainResult } from "@/utils/google/types";
+import { supabase } from "@/integrations/supabase/client";
+import type { DomainResult } from "@/utils/google/types";
 
 export function DomainChecker() {
   const [domains, setDomains] = useState("");
@@ -17,8 +19,6 @@ export function DomainChecker() {
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
-  const [dataForSeoLogin, setDataForSeoLogin] = useState("moneyfarm@gmail.com");
-  const [dataForSeoPassword, setDataForSeoPassword] = useState("f0857984f7921cba");
 
   const initializeApi = async () => {
     if (!apiKey) {
@@ -84,45 +84,24 @@ export function DomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
-          const listing = await searchGMBListing(domain);
-          // Here we'll add the DataForSEO API call later
+          const [listing, domainAge] = await Promise.all([
+            searchGMBListing(domain),
+            getDomainAge(domain)
+          ]);
+          
           newResults.push({ 
-            domain, 
+            domain,
             listing,
-            tld: domain.split('.').pop(),
-            registered: true, // We'll update this with actual data later
-            metrics: {
-              organic: {
-                pos_1: 0,
-                count: 0,
-                estimated_paid_traffic_cost: 0
-              }
-            },
-            backlinksInfo: {
-              referringDomains: 0,
-              backlinks: 0,
-              dofollow: 0
-            }
+            tld: domain.split('.').pop() || '',
+            domainAge
           });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
           newResults.push({ 
-            domain, 
+            domain,
             listing: null,
-            tld: domain.split('.').pop(),
-            registered: false,
-            metrics: {
-              organic: {
-                pos_1: 0,
-                count: 0,
-                estimated_paid_traffic_cost: 0
-              }
-            },
-            backlinksInfo: {
-              referringDomains: 0,
-              backlinks: 0,
-              dofollow: 0
-            }
+            tld: domain.split('.').pop() || '',
+            domainAge: 'N/A'
           });
         }
         setProgress(((i + 1) / domainList.length) * 100);
@@ -164,10 +143,6 @@ export function DomainChecker() {
               isInitializing={isInitializing}
               onInitialize={initializeApi}
               isApiInitialized={isApiInitialized}
-              dataForSeoLogin={dataForSeoLogin}
-              setDataForSeoLogin={setDataForSeoLogin}
-              dataForSeoPassword={dataForSeoPassword}
-              setDataForSeoPassword={setDataForSeoPassword}
             />
 
             <DomainInput

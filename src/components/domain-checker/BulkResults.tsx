@@ -17,7 +17,6 @@ export function BulkResults({ results }: BulkResultsProps) {
             <TableHead>GMB Listing</TableHead>
             <TableHead>Match Type</TableHead>
             <TableHead>Domain Age</TableHead>
-            <TableHead>SEO Performance</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,21 +73,8 @@ export function BulkResults({ results }: BulkResultsProps) {
               </TableCell>
               <TableCell>
                 <span className="text-sm">
-                  {result.domainAge || 'N/A'}
+                  {result.domainAge}
                 </span>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-2">
-                  <div className="text-sm">
-                    <span className="font-medium">Organic Position 1:</span> {result.metrics?.organic?.pos_1 || 'N/A'}
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Est. Traffic Value:</span> ${result.metrics?.organic?.estimated_paid_traffic_cost?.toLocaleString() || 'N/A'}
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-medium">Total Keywords:</span> {result.metrics?.organic?.count?.toLocaleString() || 'N/A'}
-                  </div>
-                </div>
               </TableCell>
             </TableRow>
           ))}
