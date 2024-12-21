@@ -116,16 +116,12 @@ export function DomainChecker() {
             // Fetch domain rating from Ahrefs if API key is provided
             if (ahrefsApiKey) {
               try {
-                const ratingResponse = await fetch(`https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}`, {
-                  headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${ahrefsApiKey}`
-                  }
+                const ratingResponse = await supabase.functions.invoke('get-domain-rating', {
+                  body: { domain, apiKey: ahrefsApiKey }
                 });
                 
-                if (ratingResponse.ok) {
-                  const ratingData = await ratingResponse.json();
-                  domainRating = ratingData.domain?.domain_rating;
+                if (!ratingResponse.error) {
+                  domainRating = ratingResponse.data?.domain?.domain_rating;
                 }
               } catch (error) {
                 console.error(`Error fetching domain rating for ${domain}:`, error);

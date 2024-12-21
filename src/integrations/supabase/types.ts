@@ -13,18 +13,21 @@ export type Database = {
         Row: {
           checked_at: string | null
           domain: string
+          domain_rating: number | null
           id: string
           listing: Json | null
         }
         Insert: {
           checked_at?: string | null
           domain: string
+          domain_rating?: number | null
           id?: string
           listing?: Json | null
         }
         Update: {
           checked_at?: string | null
           domain?: string
+          domain_rating?: number | null
           id?: string
           listing?: Json | null
         }
