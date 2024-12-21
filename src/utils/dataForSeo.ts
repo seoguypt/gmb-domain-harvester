@@ -4,23 +4,24 @@ const BASE_URL = 'https://api.dataforseo.com/v3';
 
 export async function getDomainAge(domain: string) {
   try {
-    const { data: { value: login } } = await supabase
+    const { data: loginData } = await supabase
       .from('secrets')
       .select('value')
       .eq('name', 'DATAFORSEO_LOGIN')
-      .single();
+      .maybeSingle();
 
-    const { data: { value: password } } = await supabase
+    const { data: passwordData } = await supabase
       .from('secrets')
       .select('value')
       .eq('name', 'DATAFORSEO_PASSWORD')
-      .single();
+      .maybeSingle();
 
-    if (!login || !password) {
-      throw new Error('DataForSEO credentials not found');
+    if (!loginData?.value || !passwordData?.value) {
+      console.error('DataForSEO credentials not found');
+      return 'N/A (API credentials not set)';
     }
 
-    const auth = Buffer.from(`${login}:${password}`).toString('base64');
+    const auth = Buffer.from(`${loginData.value}:${passwordData.value}`).toString('base64');
     
     const response = await fetch(`${BASE_URL}/domain_analytics/whois/live`, {
       method: 'POST',
@@ -44,6 +45,6 @@ export async function getDomainAge(domain: string) {
     return 'N/A';
   } catch (error) {
     console.error('Error fetching domain age:', error);
-    return 'N/A';
+    return 'N/A (API error)';
   }
 }
