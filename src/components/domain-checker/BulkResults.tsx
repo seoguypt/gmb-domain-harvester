@@ -1,6 +1,8 @@
+import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { Building2, MapPin, Star, Link, ExternalLink } from "lucide-react";
+import { SearchFilter } from "./SearchFilter";
 
 interface GMBListing {
   businessName: string;
@@ -21,13 +23,26 @@ interface BulkResultsProps {
 }
 
 export function BulkResults({ results, isLoading }: BulkResultsProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredResults = useMemo(() => {
+    if (!searchTerm) return results;
+    
+    const term = searchTerm.toLowerCase();
+    return results.filter(result => 
+      result.domain.toLowerCase().includes(term) || 
+      result.listing?.businessName.toLowerCase().includes(term)
+    );
+  }, [results, searchTerm]);
+
   return (
-    <div className="w-full mt-6 animate-fadeIn relative">
+    <div className="w-full mt-6 animate-fadeIn relative space-y-4">
       {isLoading && (
         <div className="absolute -top-6 left-0 text-sm text-muted-foreground">
           Loading more results...
         </div>
       )}
+      <SearchFilter value={searchTerm} onChange={setSearchTerm} />
       <Table>
         <TableHeader>
           <TableRow>
@@ -38,7 +53,7 @@ export function BulkResults({ results, isLoading }: BulkResultsProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {results.map((result, index) => (
+          {filteredResults.map((result, index) => (
             <TableRow key={index}>
               <TableCell>{result.domain}</TableCell>
               <TableCell>
