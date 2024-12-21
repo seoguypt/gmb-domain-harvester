@@ -46,22 +46,17 @@ export function useDomainChecker() {
 
       console.log('DataForSEO function response:', data);
 
-      if (data?.tasks?.[0]?.result) {
-        // Find the most recent result for this domain
-        const domainResult = data.tasks[0].result.find(r => 
-          r.metadata?.target === domain || 
-          r.metadata?.domain === domain
-        );
+      if (data?.tasks?.[0]?.result?.[0]) {
+        const result = data.tasks[0].result[0];
+        console.log('DataForSEO metrics:', result);
         
-        if (domainResult?.metadata) {
-          console.log('DataForSEO metrics:', domainResult.metadata);
-          return {
-            domain_rating: domainResult.metadata.domain_rank || domainResult.metadata.trust_score || 0,
-            semrush_rank: domainResult.metadata.semrush?.rank || domainResult.metadata.rank_absolute || 0,
-            facebook_shares: domainResult.metadata.social_metrics?.facebook?.shares || 0,
-            ahrefs_rank: domainResult.metadata.backlinks?.count || 0
-          };
-        }
+        // Return metrics from whois overview response
+        return {
+          domain_rating: result.registrar_info?.domain_rank || result.registrar_info?.trust_score || 0,
+          semrush_rank: result.registrar_info?.rank || result.registrar_info?.alexa_rank || 0,
+          facebook_shares: result.social_metrics?.facebook?.shares || result.social_metrics?.total_shares || 0,
+          ahrefs_rank: result.backlinks_info?.backlinks_count || result.backlinks_info?.referring_domains || 0
+        };
       }
       return null;
     } catch (error) {
