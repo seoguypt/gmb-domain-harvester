@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { Building2, MapPin, Star, Link, ExternalLink } from "lucide-react";
 import { SearchFilter } from "./SearchFilter";
+import { SortableHeader } from "./SortableHeader";
+import { useSort } from "../../hooks/useSort";
 
 interface GMBListing {
   businessName: string;
@@ -35,6 +37,8 @@ export function BulkResults({ results, isLoading }: BulkResultsProps) {
     );
   }, [results, searchTerm]);
 
+  const { items: sortedResults, sortConfig, requestSort } = useSort(filteredResults);
+
   return (
     <div className="w-full mt-6 animate-fadeIn relative space-y-4">
       {isLoading && (
@@ -46,14 +50,38 @@ export function BulkResults({ results, isLoading }: BulkResultsProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Domain</TableHead>
-            <TableHead>GMB Listing</TableHead>
-            <TableHead>Match Type</TableHead>
-            <TableHead>Check Domain</TableHead>
+            <SortableHeader
+              label="Domain"
+              sortKey="domain"
+              currentKey={sortConfig.key}
+              direction={sortConfig.direction}
+              onSort={requestSort}
+            />
+            <SortableHeader
+              label="GMB Listing"
+              sortKey="listing.businessName"
+              currentKey={sortConfig.key}
+              direction={sortConfig.direction}
+              onSort={requestSort}
+            />
+            <SortableHeader
+              label="Match Type"
+              sortKey="listing.matchType"
+              currentKey={sortConfig.key}
+              direction={sortConfig.direction}
+              onSort={requestSort}
+            />
+            <SortableHeader
+              label="Check Domain"
+              sortKey=""
+              currentKey={sortConfig.key}
+              direction={sortConfig.direction}
+              onSort={requestSort}
+            />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredResults.map((result, index) => (
+          {sortedResults.map((result, index) => (
             <TableRow key={index}>
               <TableCell>{result.domain}</TableCell>
               <TableCell>
