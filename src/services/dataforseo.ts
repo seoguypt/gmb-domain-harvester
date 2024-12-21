@@ -1,37 +1,13 @@
-import { DATAFORSEO_CONFIG } from "../config/dataforseo";
-
 export async function fetchDomainMetrics(domain: string) {
-  // Log config state
-  console.log('DataForSEO Config:', {
-    hasLogin: !!DATAFORSEO_CONFIG.login,
-    hasPassword: !!DATAFORSEO_CONFIG.password
-  });
-
-  if (!DATAFORSEO_CONFIG.login || !DATAFORSEO_CONFIG.password) {
-    console.error('DataForSEO credentials not configured');
-    return null;
-  }
-
   try {
-    const auth = btoa(`${DATAFORSEO_CONFIG.login}:${DATAFORSEO_CONFIG.password}`);
-    
     console.log('Making DataForSEO request for domain:', domain);
     
-    // Use cors-anywhere proxy
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const apiUrl = 'https://api.dataforseo.com/v3/domain_analytics/whois/overview/live';
-    
-    const response = await fetch(proxyUrl + apiUrl, {
+    const response = await fetch('/.netlify/functions/dataforseo', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': window.location.origin
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify([{
-        target: domain
-      }])
+      body: JSON.stringify({ domain })
     });
 
     console.log('DataForSEO response status:', response.status);
