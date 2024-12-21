@@ -33,20 +33,33 @@ export function useDomainChecker() {
         body: { domain }
       });
 
-      if (error) {
-        console.error('Error fetching domain analytics:', error);
+      if (error || data?.error) {
+        const errorMsg = data?.error || error?.message || 'Unknown error';
+        console.error('DataForSEO API error:', errorMsg);
+        toast({
+          title: "Domain Metrics Error",
+          description: `Failed to fetch metrics: ${errorMsg}`,
+          variant: "destructive",
+        });
         return null;
       }
+
+      console.log('DataForSEO function response:', data);
 
       if (data?.tasks?.[0]?.result?.[0]) {
         const metrics = data.tasks[0].result[0];
         console.log('DataForSEO metrics:', metrics);
-        return {
-          domain_rating: metrics.domain_rank,
-          semrush_rank: metrics.semrush_rank,
-          facebook_shares: metrics.facebook_shares,
-          ahrefs_rank: metrics.ahrefs_rank
-        };
+        
+        // Only return metrics if we have actual non-null values
+        const hasMetrics = Object.values(metrics).some(value => value !== null);
+        if (hasMetrics) {
+          return {
+            domain_rating: metrics.domain_rating || null,
+            semrush_rank: metrics.semrush_rank || null,
+            facebook_shares: metrics.facebook_shares || null,
+            ahrefs_rank: metrics.ahrefs_rank || null
+          };
+        }
       }
       return null;
     } catch (error) {

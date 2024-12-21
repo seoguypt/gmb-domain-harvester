@@ -41,24 +41,74 @@ serve(async (req) => {
 
     const auth = btoa(`${login}:${password}`);
     
-    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/domain/overview', {
+    console.log('Making request to DataForSEO API for domain:', domain);
+    
+    // Use the correct endpoint and parameters for domain analytics
+    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/domain/overview/live', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify([{ target: domain }])
+      body: JSON.stringify([{
+        target: domain,
+        include_subdomains: true,
+        filters: ["metrics.visibility.organic.value,>0"]
+      }])
     });
 
+    const responseText = await response.text();
+    console.log('DataForSEO API Response Status:', response.status);
+    console.log('DataForSEO API Response Text:', responseText);
+
     if (!response.ok) {
-      console.error('DataForSEO API error:', await response.text());
-      throw new Error('Failed to fetch domain analytics');
+      return new Response(
+        JSON.stringify({ 
+          error: `DataForSEO API error: ${responseText}`,
+          status: response.status 
+        }),
+        { 
+          status: 200, // Return 200 to prevent Supabase from retrying
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
+    console.log('DataForSEO API Raw Response:', JSON.stringify(data, null, 2));
+    
+    // Extract relevant metrics from the response
+    const result = data?.tasks?.[0]?.result?.[0];
+    console.log('DataForSEO Result Object:', JSON.stringify(result, null, 2));
+    
+    if (!result) {
+      console.log('No result data found in API response');
+      return new Response(
+        JSON.stringify({ error: 'No data available for this domain' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Map API response fields to our expected metrics
+    const metrics = {
+      domain_rating: result.metrics?.trust_score || result.metrics?.domain_rank || null,
+      semrush_rank: result.metrics?.semrush?.rank || null,
+      facebook_shares: result.metrics?.social?.facebook_shares || null,
+      ahrefs_rank: result.metrics?.ahrefs?.rank || null
+    };
+    
+    console.log('Extracted Metrics:', JSON.stringify(metrics, null, 2));
     
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify({ 
+        tasks: [{ 
+          result: [metrics],
+          status_code: 20000,
+          status_message: "Ok"
+        }] 
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
