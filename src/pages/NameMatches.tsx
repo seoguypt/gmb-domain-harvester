@@ -1,66 +1,12 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { BulkResults } from "@/components/domain-checker/BulkResults";
-import { supabase } from "@/integrations/supabase/client";
+import { Card } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { BulkResults } from "../components/domain-checker/BulkResults";
 import { ArrowLeft, Trash2 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useDomainChecker } from "../context/DomainCheckerContext";
 
 const NameMatches = () => {
-  const [results, setResults] = useState<{ domain: string; listing: any; }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-
-  const fetchNameMatches = async () => {
-    const { data, error } = await supabase
-      .from('domain_checks')
-      .select('*')
-      .not('listing', 'is', null)
-      .contains('listing', { matchType: 'name' })
-      .order('checked_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching name matches:', error);
-      return;
-    }
-
-    const formattedResults = data.map(item => ({
-      domain: item.domain,
-      listing: item.listing
-    }));
-
-    setResults(formattedResults);
-    setIsLoading(false);
-  };
-
-  const clearAllData = async () => {
-    try {
-      const { error } = await supabase
-        .from('domain_checks')
-        .delete()
-        .contains('listing', { matchType: 'name' });
-
-      if (error) throw error;
-
-      setResults([]);
-      toast({
-        title: "Success",
-        description: "All name matches have been cleared",
-      });
-    } catch (error) {
-      console.error('Error clearing data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to clear name matches",
-        variant: "destructive",
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchNameMatches();
-  }, []);
+  const { nameMatches, clearNameMatches } = useDomainChecker();
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-gray-50 to-gray-100">
@@ -75,7 +21,7 @@ const NameMatches = () => {
             </Link>
             <Button
               variant="destructive"
-              onClick={clearAllData}
+              onClick={clearNameMatches}
               className="gap-2"
             >
               <Trash2 className="h-4 w-4" />
@@ -90,10 +36,8 @@ const NameMatches = () => {
             </p>
           </div>
 
-          {isLoading ? (
-            <p className="text-center text-muted-foreground">Loading name matches...</p>
-          ) : results.length > 0 ? (
-            <BulkResults results={results} />
+          {nameMatches.length > 0 ? (
+            <BulkResults results={nameMatches} isLoading={false} />
           ) : (
             <p className="text-center text-muted-foreground">No name matches found yet.</p>
           )}

@@ -24,9 +24,11 @@ interface DomainCheckerContextType {
   results: DomainResult[];
   setResults: React.Dispatch<React.SetStateAction<DomainResult[]>>;
   websiteMatches: DomainResult[];
+  nameMatches: DomainResult[];
   progress: number;
   checkDomains: (isApiInitialized: boolean) => Promise<void>;
   clearWebsiteMatches: () => void;
+  clearNameMatches: () => void;
 }
 
 const DomainCheckerContext = createContext<DomainCheckerContextType | undefined>(undefined);
@@ -36,6 +38,7 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<DomainResult[]>([]);
   const [websiteMatches, setWebsiteMatches] = useState<DomainResult[]>([]);
+  const [nameMatches, setNameMatches] = useState<DomainResult[]>([]);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
@@ -44,6 +47,14 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
     toast({
       title: "Success",
       description: "All website matches have been cleared",
+    });
+  };
+
+  const clearNameMatches = () => {
+    setNameMatches([]);
+    toast({
+      title: "Success",
+      description: "All name matches have been cleared",
     });
   };
 
@@ -106,10 +117,15 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
         if (currentTime - lastUpdateTime >= UPDATE_INTERVAL || processedCount === domainList.length) {
           setResults(prev => [...prev, ...batchResults]);
           
-          // Update website matches
+          // Update website and name matches
           const newWebsiteMatches = batchResults.filter(result => result.listing?.matchType === 'website');
+          const newNameMatches = batchResults.filter(result => result.listing?.matchType === 'name');
+          
           if (newWebsiteMatches.length > 0) {
             setWebsiteMatches(prev => [...prev, ...newWebsiteMatches]);
+          }
+          if (newNameMatches.length > 0) {
+            setNameMatches(prev => [...prev, ...newNameMatches]);
           }
           
           lastUpdateTime = currentTime;
@@ -143,9 +159,11 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
         results,
         setResults,
         websiteMatches,
+        nameMatches,
         progress,
         checkDomains,
         clearWebsiteMatches,
+        clearNameMatches,
       }}
     >
       {children}
