@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Link as LinkIcon, ArrowLeft } from "lucide-react";
+import { Link as LinkIcon, ArrowLeft, Building2, MapPin, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { GMBListing } from "@/utils/google/types";
 
 interface DomainCheck {
@@ -48,45 +49,48 @@ const WebsiteMatches = () => {
         {isLoading ? (
           <div className="text-center py-8">Loading matches...</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Domain Checked</TableHead>
-                <TableHead>Business Name</TableHead>
-                <TableHead>Website Used</TableHead>
-                <TableHead>Checked At</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {matches?.map((match) => (
-                <TableRow key={match.id}>
-                  <TableCell className="font-medium">{match.domain}</TableCell>
-                  <TableCell>{match.listing.businessName}</TableCell>
-                  <TableCell>
-                    <a 
-                      href={`https://www.google.com/maps/place/?q=place_id:${match.listing.placeId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-primary hover:underline"
-                    >
-                      <LinkIcon className="h-4 w-4" />
-                      {match.listing.websiteUrl}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(match.checked_at).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {!matches?.length && (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
-                    No website matches found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {matches?.map((match) => (
+              <Card key={match.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">{match.domain}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <span>{match.listing.businessName}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">{match.listing.address}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-amber-500" />
+                      <span className="text-sm">{match.listing.rating} / 5.0</span>
+                    </div>
+                  </div>
+                  <a 
+                    href={`https://www.google.com/maps/place/?q=place_id:${match.listing.placeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary hover:underline"
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                    View on Google Maps
+                  </a>
+                  <div className="text-sm text-muted-foreground">
+                    Checked on: {new Date(match.checked_at).toLocaleDateString()}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {!matches?.length && (
+              <div className="col-span-full text-center py-8">
+                No website matches found
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>
