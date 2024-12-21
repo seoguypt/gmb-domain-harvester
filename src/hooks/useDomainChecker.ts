@@ -43,6 +43,39 @@ export function useDomainChecker() {
     }
   };
 
+  const getDomainRating = async (domain: string, apiKey: string) => {
+    try {
+      console.log(`Fetching domain rating for ${domain}`);
+      const response = await fetch(
+        `https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          }
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Ahrefs API error:', errorText);
+        throw new Error(`Ahrefs API error: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Ahrefs API response:', data);
+      return data?.domain_rating;
+    } catch (error) {
+      console.error(`Error fetching domain rating for ${domain}:`, error);
+      toast({
+        title: "Domain Rating Error",
+        description: `Failed to fetch domain rating for ${domain}`,
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
   const checkDomains = async (domains: string, ahrefsApiKey: string) => {
     if (!domains.trim()) {
       toast({
@@ -104,31 +137,7 @@ export function useDomainChecker() {
             listing = await searchGMBListing(domain);
             
             if (ahrefsApiKey) {
-              try {
-                console.log(`Fetching domain rating for ${domain}`);
-                const ratingResponse = await supabase.functions.invoke('get-domain-rating', {
-                  body: { domain, apiKey: ahrefsApiKey }
-                });
-                
-                if (ratingResponse.error) {
-                  console.error('Ahrefs API error:', ratingResponse.error);
-                  toast({
-                    title: "Ahrefs API Error",
-                    description: `Failed to fetch domain rating: ${ratingResponse.error.message}`,
-                    variant: "destructive",
-                  });
-                } else {
-                  console.log('Ahrefs API response:', ratingResponse.data);
-                  domainRating = ratingResponse.data?.domain_rating;
-                }
-              } catch (error) {
-                console.error(`Error fetching domain rating for ${domain}:`, error);
-                toast({
-                  title: "Domain Rating Error",
-                  description: `Failed to fetch domain rating for ${domain}`,
-                  variant: "destructive",
-                });
-              }
+              domainRating = await getDomainRating(domain, ahrefsApiKey);
             }
             
             try {
