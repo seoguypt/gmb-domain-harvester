@@ -6,6 +6,9 @@ import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
 
 interface GMBListing {
   businessName: string;
@@ -14,6 +17,7 @@ interface GMBListing {
   type: string;
   placeId: string;
   matchType: "website" | "name" | null;
+  websiteUrl?: string;
 }
 
 export function DomainChecker() {
@@ -90,13 +94,35 @@ export function DomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
-          const listing = await searchGMBListing(domain);
+          // Check cache first
+          const { data: cachedResult } = await supabase
+            .from('domain_checks')
+            .select('listing')
+            .eq('domain', domain)
+            .single();
+
+          let listing;
+          if (cachedResult) {
+            console.log('Cache hit for domain:', domain);
+            listing = cachedResult.listing;
+          } else {
+            console.log('Cache miss for domain:', domain);
+            listing = await searchGMBListing(domain);
+            // Store in cache
+            await supabase
+              .from('domain_checks')
+              .insert({
+                domain: domain,
+                listing: listing,
+                checked_at: new Date().toISOString()
+              });
+          }
+          
           newResults.push({ domain, listing });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
           newResults.push({ domain, listing: null });
         }
-        // Update progress after each domain check
         setProgress(((i + 1) / domainList.length) * 100);
       }
       
@@ -127,6 +153,11 @@ export function DomainChecker() {
             <p className="text-muted-foreground">
               Check if domains have active Google My Business listings
             </p>
+            <Link to="/found">
+              <Button variant="outline" className="mt-2">
+                View Found Domains
+              </Button>
+            </Link>
           </div>
 
           <div className="space-y-4">
