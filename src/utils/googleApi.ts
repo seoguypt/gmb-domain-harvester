@@ -24,7 +24,6 @@ export const initGoogleMapsApi = async (apiKey: string) => {
     console.log('Loading Google Maps API...');
     await loader.load();
     
-    // Create a dummy map (required for PlacesService)
     const dummyDiv = document.createElement('div');
     const map = new google.maps.Map(dummyDiv, {
       center: { lat: 0, lng: 0 },
@@ -46,18 +45,23 @@ export const initGoogleMapsApi = async (apiKey: string) => {
   }
 };
 
+const cleanDomain = (domain: string): string => {
+  // Remove protocol, www, and TLD
+  return domain.toLowerCase()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .replace(/\.[^/.]+$/, '');
+};
+
 const cleanBusinessName = (domain: string): string => {
   // Remove TLD and common subdomain
-  let name = domain.replace(/\.[^/.]+$/, "").replace("www.", "");
+  let name = cleanDomain(domain);
   
   // Remove common business suffixes
   const suffixes = [
     "ltd", "limited", "inc", "incorporated", "llc", "corp", "corporation",
     "co", "company", "services", "solutions", "group", "holdings", "enterprises"
   ];
-  
-  // Convert to lowercase for comparison
-  name = name.toLowerCase();
   
   // Remove suffixes if they appear at the end of the name
   suffixes.forEach(suffix => {
@@ -69,6 +73,20 @@ const cleanBusinessName = (domain: string): string => {
   name = name.replace(/[-_]/g, ' ');
   
   return name.trim();
+};
+
+const extractDomainFromUrl = (url: string): string => {
+  try {
+    // Remove protocol and get domain
+    const domain = url.toLowerCase()
+      .replace(/^https?:\/\//i, '')
+      .replace(/^www\./i, '')
+      .split('/')[0];
+    return domain;
+  } catch (error) {
+    console.error('Error extracting domain from URL:', url);
+    return '';
+  }
 };
 
 export const searchGMBListing = (domain: string): Promise<{
@@ -86,7 +104,8 @@ export const searchGMBListing = (domain: string): Promise<{
     }
 
     const cleanedName = cleanBusinessName(domain);
-    console.log(`Searching for business: "${cleanedName}"`);
+    const cleanedDomain = cleanDomain(domain);
+    console.log(`Searching for business: "${cleanedName}" (Domain: ${cleanedDomain})`);
 
     const request: google.maps.places.TextSearchRequest = {
       query: cleanedName,
@@ -105,17 +124,29 @@ export const searchGMBListing = (domain: string): Promise<{
           (place, detailsStatus) => {
             if (detailsStatus === google.maps.places.PlacesServiceStatus.OK && place) {
               const placeWebsite = place.website?.toLowerCase() || '';
-              const domainLower = domain.toLowerCase();
+              const placeDomain = extractDomainFromUrl(placeWebsite);
+              const businessNameLower = place.name?.toLowerCase() || '';
               
-              // Check if the website matches the domain or if it's a subdomain
-              const websiteMatch = placeWebsite.includes(domainLower) || 
-                                 domainLower.includes(placeWebsite.replace(/^https?:\/\//i, ''));
+              console.log(`Comparing:
+                Input domain: ${domain}
+                Cleaned domain: ${cleanedDomain}
+                Place website: ${placeWebsite}
+                Place domain: ${placeDomain}
+                Place name: ${businessNameLower}
+                Cleaned name: ${cleanedName}`);
               
-              // Check if the business name is similar to the domain name
-              const nameMatch = place.name?.toLowerCase().includes(cleanedName) || 
-                              cleanedName.includes(place.name?.toLowerCase() || '');
+              // Strict website match - domains must match exactly
+              const websiteMatch = placeDomain === domain.toLowerCase();
+              
+              // Strict name match - business name must contain the entire cleaned domain name
+              // or vice versa, and be at least 70% similar in length
+              const nameMatch = (businessNameLower.includes(cleanedName) || 
+                               cleanedName.includes(businessNameLower)) &&
+                               Math.min(businessNameLower.length, cleanedName.length) / 
+                               Math.max(businessNameLower.length, cleanedName.length) > 0.7;
               
               if (websiteMatch || nameMatch) {
+                console.log(`Match found! Type: ${websiteMatch ? 'website' : 'name'}`);
                 resolve({
                   businessName: place.name || "",
                   address: place.formatted_address || "",
@@ -125,14 +156,17 @@ export const searchGMBListing = (domain: string): Promise<{
                   matchType: websiteMatch ? "website" : "name"
                 });
               } else {
+                console.log('No match - criteria not met');
                 resolve(null);
               }
             } else {
+              console.log('No match - could not get place details');
               resolve(null);
             }
           }
         );
       } else {
+        console.log('No match - no search results');
         resolve(null);
       }
     });
