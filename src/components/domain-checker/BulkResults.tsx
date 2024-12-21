@@ -33,7 +33,7 @@ export function BulkResults({ results }: BulkResultsProps) {
               <TableHead className="w-1/4">Domain</TableHead>
               <TableHead className="w-1/3">GMB Listing</TableHead>
               <TableHead className="w-1/4">Match Type</TableHead>
-              <TableHead>Domain Age</TableHead>
+              <TableHead>Check</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,9 +110,26 @@ export function BulkResults({ results }: BulkResultsProps) {
                   )}
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm">
-                    {result.domainAge}
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <a 
+                      href={`https://majestic.com/reports/site-explorer?q=${result.domain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      <span>Majestic</span>
+                    </a>
+                    <a 
+                      href={`https://app.ahrefs.com/v2-site-explorer/overview?mode=subdomains&target=${result.domain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      <span>Ahrefs</span>
+                    </a>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
