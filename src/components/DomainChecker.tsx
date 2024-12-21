@@ -27,33 +27,10 @@ export function DomainChecker() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
-  const [apiKey, setApiKey] = useState("");
+  const [apiKey, setApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
 
-  useEffect(() => {
-    const fetchApiKey = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('secrets')
-          .select('value')
-          .eq('name', 'GOOGLE_MAPS_API_KEY')
-          .single();
-        
-        if (error) throw error;
-        if (data?.value) {
-          setApiKey(data.value);
-          initializeApi(data.value);
-        }
-      } catch (error) {
-        console.error('Error fetching API key:', error);
-      }
-    };
-
-    fetchApiKey();
-  }, []);
-
-  const initializeApi = async (key?: string) => {
-    const keyToUse = key || apiKey;
-    if (!keyToUse) {
+  const initializeApi = async () => {
+    if (!apiKey) {
       toast({
         title: "API Key Required",
         description: "Please enter your Google Maps API key",
@@ -64,7 +41,7 @@ export function DomainChecker() {
 
     setIsInitializing(true);
     try {
-      await initGoogleMapsApi(keyToUse);
+      await initGoogleMapsApi(apiKey);
       setIsApiInitialized(true);
       toast({
         title: "API Initialized",
