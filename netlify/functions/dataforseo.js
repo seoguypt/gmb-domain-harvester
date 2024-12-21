@@ -1,5 +1,4 @@
-exports.handler = async (event) => {
-  // Only allow POST requests
+const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -9,7 +8,6 @@ exports.handler = async (event) => {
 
   try {
     const { domain } = JSON.parse(event.body);
-
     if (!domain) {
       return {
         statusCode: 400,
@@ -31,7 +29,6 @@ exports.handler = async (event) => {
     });
 
     const data = await response.json();
-
     return {
       statusCode: 200,
       headers: {
@@ -42,10 +39,11 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error('Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
     };
   }
 };
+
+module.exports = { handler };
