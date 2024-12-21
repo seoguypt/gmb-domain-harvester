@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Building2, MapPin, Star, Link, Calendar, Building, Clock, Globe, Users, ArrowUpRight } from 'lucide-react';
-import type { DomainResult } from "@/components/DomainChecker";
+import type { DomainResult } from "@/utils/google/types";
 
 interface BulkResultsProps {
   results: DomainResult[];
