@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
-import { ListingResult } from "./domain-checker/ListingResult";
+import { BulkResults } from "./domain-checker/BulkResults";
 
 interface GMBListing {
   businessName: string;
@@ -14,10 +14,10 @@ interface GMBListing {
 }
 
 export function DomainChecker() {
-  const [domain, setDomain] = useState("");
+  const [domains, setDomains] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [listing, setListing] = useState<GMBListing | null>(null);
+  const [results, setResults] = useState<{ domain: string; listing: GMBListing | null; }[]>([]);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("");
@@ -53,11 +53,11 @@ export function DomainChecker() {
     }
   };
 
-  const checkDomain = async () => {
-    if (!domain) {
+  const checkDomains = async () => {
+    if (!domains.trim()) {
       toast({
-        title: "Please enter a domain",
-        description: "Enter a domain to check for GMB listings",
+        title: "Please enter domains",
+        description: "Enter one or more domains to check for GMB listings",
         variant: "destructive",
       });
       return;
@@ -73,27 +73,35 @@ export function DomainChecker() {
     }
 
     setIsLoading(true);
-    setListing(null);
+    setResults([]);
+
+    const domainList = domains
+      .split("\n")
+      .map(d => d.trim())
+      .filter(d => d);
 
     try {
-      const result = await searchGMBListing(domain);
-      if (result) {
-        setListing(result);
-        toast({
-          title: "GMB Listing Found!",
-          description: "We found an active GMB listing for this domain.",
-        });
-      } else {
-        toast({
-          title: "No GMB Listing Found",
-          description: "We couldn't find a GMB listing for this domain.",
-        });
+      const newResults = [];
+      for (const domain of domainList) {
+        try {
+          const listing = await searchGMBListing(domain);
+          newResults.push({ domain, listing });
+        } catch (error) {
+          console.error(`Error checking domain ${domain}:`, error);
+          newResults.push({ domain, listing: null });
+        }
       }
-    } catch (error) {
-      console.error("Error checking domain:", error);
+      
+      setResults(newResults);
       toast({
-        title: "Error checking domain",
-        description: "Unable to check GMB listing at this time.",
+        title: "Domain Check Complete",
+        description: `Checked ${domainList.length} domain${domainList.length === 1 ? '' : 's'}`,
+      });
+    } catch (error) {
+      console.error("Error checking domains:", error);
+      toast({
+        title: "Error checking domains",
+        description: "Unable to check GMB listings at this time.",
         variant: "destructive",
       });
     } finally {
@@ -108,7 +116,7 @@ export function DomainChecker() {
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight">Domain Checker</h1>
             <p className="text-muted-foreground">
-              Check if a domain has an active Google My Business listing
+              Check if domains have active Google My Business listings
             </p>
           </div>
 
@@ -122,15 +130,15 @@ export function DomainChecker() {
             />
 
             <DomainInput
-              domain={domain}
-              setDomain={setDomain}
+              domains={domains}
+              setDomains={setDomains}
               isLoading={isLoading}
               isApiInitialized={isApiInitialized}
-              onCheck={checkDomain}
+              onCheck={checkDomains}
             />
           </div>
 
-          {listing && <ListingResult listing={listing} />}
+          {results.length > 0 && <BulkResults results={results} />}
         </div>
       </Card>
     </div>

@@ -1,37 +1,38 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
 interface DomainInputProps {
-  domain: string;
-  setDomain: (domain: string) => void;
+  domains: string;
+  setDomains: (domains: string) => void;
   isLoading: boolean;
   isApiInitialized: boolean;
   onCheck: () => Promise<void>;
 }
 
 export function DomainInput({
-  domain,
-  setDomain,
+  domains,
+  setDomains,
   isLoading,
   isApiInitialized,
   onCheck,
 }: DomainInputProps) {
   return (
-    <div className="flex gap-2">
-      <Input
-        placeholder="Enter domain (e.g., example.com)"
-        value={domain}
-        onChange={(e) => setDomain(e.target.value)}
-        className="text-lg"
+    <div className="space-y-2">
+      <Textarea
+        placeholder="Enter domains (one per line)"
+        value={domains}
+        onChange={(e) => setDomains(e.target.value)}
+        className="min-h-[120px] text-base font-mono"
         disabled={isLoading || !isApiInitialized}
       />
       <Button
         onClick={onCheck}
         disabled={isLoading || !isApiInitialized}
-        className="min-w-[100px]"
+        className="w-full"
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Check"}
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        {isLoading ? "Checking Domains..." : "Check Domains"}
       </Button>
     </div>
   );
