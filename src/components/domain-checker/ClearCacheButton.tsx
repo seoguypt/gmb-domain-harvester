@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ClearCacheButtonProps {
   onClearComplete: () => void;
@@ -40,14 +46,23 @@ export function ClearCacheButton({ onClearComplete }: ClearCacheButtonProps) {
   };
 
   return (
-    <Button 
-      variant="outline" 
-      onClick={clearCache}
-      disabled={isClearing}
-      className="flex items-center gap-2"
-    >
-      <Trash2 className="h-4 w-4" />
-      {isClearing ? "Clearing..." : "Clear Cache"}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="outline" 
+            onClick={clearCache}
+            disabled={isClearing}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            {isClearing ? "Clearing..." : "Clear Cache"}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Warning: This will delete all previously checked domains</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
