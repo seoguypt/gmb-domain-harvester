@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { MapPin, Building2, Star, Loader2 } from "lucide-react";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
+import { APIKeyInput } from "./domain-checker/APIKeyInput";
+import { DomainInput } from "./domain-checker/DomainInput";
+import { ListingResult } from "./domain-checker/ListingResult";
 
 interface GMBListing {
   businessName: string;
@@ -113,77 +113,24 @@ export function DomainChecker() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter Google Maps API Key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="text-lg"
-                type="password"
-              />
-              <Button
-                onClick={initializeApi}
-                disabled={isInitializing || !apiKey}
-                className="min-w-[100px]"
-              >
-                {isInitializing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Initialize API"
-                )}
-              </Button>
-            </div>
+            <APIKeyInput
+              apiKey={apiKey}
+              setApiKey={setApiKey}
+              isInitializing={isInitializing}
+              onInitialize={initializeApi}
+              isApiInitialized={isApiInitialized}
+            />
 
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter domain (e.g., example.com)"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                className="text-lg"
-                disabled={isLoading || !isApiInitialized}
-              />
-              <Button
-                onClick={checkDomain}
-                disabled={isLoading || !isApiInitialized}
-                className="min-w-[100px]"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Check"
-                )}
-              </Button>
-            </div>
+            <DomainInput
+              domain={domain}
+              setDomain={setDomain}
+              isLoading={isLoading}
+              isApiInitialized={isApiInitialized}
+              onCheck={checkDomain}
+            />
           </div>
 
-          {listing && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="h-px bg-border" />
-              
-              <div className="grid gap-4">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium">{listing.businessName}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <span>{listing.address}</span>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-muted-foreground" />
-                  <span>{listing.rating} / 5.0</span>
-                </div>
-                
-                <div className="inline-flex">
-                  <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-primary/10 text-primary">
-                    {listing.type}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
+          {listing && <ListingResult listing={listing} />}
         </div>
       </Card>
     </div>
