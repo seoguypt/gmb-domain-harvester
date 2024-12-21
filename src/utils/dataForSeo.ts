@@ -26,6 +26,9 @@ export async function getDomainAge(domain: string, login?: string, password?: st
     
     if (data.tasks?.[0]?.result?.[0]?.items?.[0]) {
       const whoisData = data.tasks[0].result[0].items[0];
+      if (!whoisData.creation_date) {
+        return 'N/A (No data)';
+      }
       const creationDate = new Date(whoisData.creation_date);
       const now = new Date();
       const ageInYears = ((now.getTime() - creationDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
