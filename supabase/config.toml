@@ -1,6 +1,0 @@
-# Project ID from the Supabase dashboard
-project_id = "dqkoklfdlqabquqqofsg"
-
-[[functions]]
-name = "dataforseo"
-verify_jwt = false
