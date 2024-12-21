@@ -1,22 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link } from "lucide-react";
-
-interface GMBListing {
-  businessName: string;
-  address: string;
-  rating: number;
-  type: string;
-  placeId: string;
-  matchType: "website" | "name" | null;
-  websiteUrl?: string;
-}
+import { Building2, MapPin, Star, Link, Calendar, Building, Clock } from "lucide-react";
+import type { DomainResult } from "@/components/DomainChecker";
 
 interface BulkResultsProps {
-  results: {
-    domain: string;
-    listing: GMBListing | null;
-  }[];
+  results: DomainResult[];
 }
 
 export function BulkResults({ results }: BulkResultsProps) {
@@ -27,6 +15,7 @@ export function BulkResults({ results }: BulkResultsProps) {
           <TableRow>
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
+            <TableHead>Domain Info</TableHead>
             <TableHead>Match Type</TableHead>
           </TableRow>
         </TableHeader>
@@ -73,6 +62,32 @@ export function BulkResults({ results }: BulkResultsProps) {
                 ) : (
                   <span className="text-muted-foreground">No</span>
                 )}
+              </TableCell>
+              <TableCell>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <button className="flex items-center gap-2 text-primary cursor-pointer hover:underline">
+                      <Clock className="h-4 w-4" />
+                      View Details
+                    </button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>Age: {result.domainAge}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <span>Registrar: {result.registrar}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>Expires: {result.expiryDate}</span>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               </TableCell>
               <TableCell>
                 {result.listing?.matchType && (

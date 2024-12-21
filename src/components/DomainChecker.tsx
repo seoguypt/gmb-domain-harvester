@@ -8,11 +8,19 @@ import { BulkResults } from "./domain-checker/BulkResults";
 import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
 import type { GMBListing } from "@/utils/google";
 
+export interface DomainResult {
+  domain: string;
+  listing: GMBListing | null;
+  domainAge?: string;
+  registrar?: string;
+  expiryDate?: string;
+}
+
 export function DomainChecker() {
   const [domains, setDomains] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [results, setResults] = useState<{ domain: string; listing: GMBListing | null; }[]>([]);
+  const [results, setResults] = useState<DomainResult[]>([]);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
@@ -70,6 +78,15 @@ export function DomainChecker() {
       return;
     }
 
+    if (!dataForSeoLogin || !dataForSeoPassword) {
+      toast({
+        title: "DataForSEO Credentials Required",
+        description: "Please enter your DataForSEO login and password",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setResults([]);
     setProgress(0);
@@ -85,10 +102,23 @@ export function DomainChecker() {
         const domain = domainList[i];
         try {
           const listing = await searchGMBListing(domain);
-          newResults.push({ domain, listing });
+          // Here we'll add the DataForSEO API call later
+          newResults.push({ 
+            domain, 
+            listing,
+            domainAge: "Pending DataForSEO integration",
+            registrar: "Pending DataForSEO integration",
+            expiryDate: "Pending DataForSEO integration"
+          });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
-          newResults.push({ domain, listing: null });
+          newResults.push({ 
+            domain, 
+            listing: null,
+            domainAge: "Error fetching data",
+            registrar: "Error fetching data",
+            expiryDate: "Error fetching data"
+          });
         }
         setProgress(((i + 1) / domainList.length) * 100);
       }
@@ -129,6 +159,10 @@ export function DomainChecker() {
               isInitializing={isInitializing}
               onInitialize={initializeApi}
               isApiInitialized={isApiInitialized}
+              dataForSeoLogin={dataForSeoLogin}
+              setDataForSeoLogin={setDataForSeoLogin}
+              dataForSeoPassword={dataForSeoPassword}
+              setDataForSeoPassword={setDataForSeoPassword}
             />
 
             <DomainInput
