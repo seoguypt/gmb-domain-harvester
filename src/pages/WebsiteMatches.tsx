@@ -12,7 +12,20 @@ interface DomainCheck {
   id: string;
   domain: string;
   checked_at: string;
-  listing: GMBListing;
+  listing: unknown;
+}
+
+// Type guard to validate if an unknown value is a GMBListing
+function isGMBListing(value: unknown): value is GMBListing {
+  if (!value || typeof value !== 'object') return false;
+  const listing = value as Partial<GMBListing>;
+  return (
+    typeof listing.placeId === 'string' &&
+    typeof listing.businessName === 'string' &&
+    typeof listing.address === 'string' &&
+    typeof listing.rating === 'number' &&
+    (listing.matchType === 'website' || listing.matchType === 'name')
+  );
 }
 
 const WebsiteMatches = () => {
@@ -29,11 +42,11 @@ const WebsiteMatches = () => {
       
       if (error) throw error;
       
-      // Safely cast the data and ensure it matches our expected type
-      return data.map(item => ({
-        ...item,
-        listing: item.listing as GMBListing
-      })) as DomainCheck[];
+      // Safely cast and validate the data
+      return (data as DomainCheck[])
+        .filter((item): item is DomainCheck & { listing: GMBListing } => {
+          return isGMBListing(item.listing);
+        });
     }
   });
 
