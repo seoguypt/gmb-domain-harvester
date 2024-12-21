@@ -6,15 +6,7 @@ import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
 import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
-import type { GMBListing } from "@/utils/google";
-
-export interface DomainResult {
-  domain: string;
-  listing: GMBListing | null;
-  domainAge?: string;
-  registrar?: string;
-  expiryDate?: string;
-}
+import type { GMBListing, DomainResult } from "@/utils/google/types";
 
 export function DomainChecker() {
   const [domains, setDomains] = useState("");
@@ -78,15 +70,6 @@ export function DomainChecker() {
       return;
     }
 
-    if (!dataForSeoLogin || !dataForSeoPassword) {
-      toast({
-        title: "DataForSEO Credentials Required",
-        description: "Please enter your DataForSEO login and password",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
     setResults([]);
     setProgress(0);
@@ -106,18 +89,40 @@ export function DomainChecker() {
           newResults.push({ 
             domain, 
             listing,
-            domainAge: "Pending DataForSEO integration",
-            registrar: "Pending DataForSEO integration",
-            expiryDate: "Pending DataForSEO integration"
+            tld: domain.split('.').pop(),
+            registered: true, // We'll update this with actual data later
+            metrics: {
+              organic: {
+                pos_1: 0,
+                count: 0,
+                estimated_paid_traffic_cost: 0
+              }
+            },
+            backlinksInfo: {
+              referringDomains: 0,
+              backlinks: 0,
+              dofollow: 0
+            }
           });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
           newResults.push({ 
             domain, 
             listing: null,
-            domainAge: "Error fetching data",
-            registrar: "Error fetching data",
-            expiryDate: "Error fetching data"
+            tld: domain.split('.').pop(),
+            registered: false,
+            metrics: {
+              organic: {
+                pos_1: 0,
+                count: 0,
+                estimated_paid_traffic_cost: 0
+              }
+            },
+            backlinksInfo: {
+              referringDomains: 0,
+              backlinks: 0,
+              dofollow: 0
+            }
           });
         }
         setProgress(((i + 1) / domainList.length) * 100);
