@@ -22,9 +22,9 @@ serve(async (req) => {
 
     console.log(`Fetching domain rating for ${domain}`)
 
-    // Using the correct Ahrefs API endpoint and format
+    // The correct endpoint for Ahrefs API v3
     const response = await fetch(
-      `https://api.ahrefs.com/v3/domain-rating?target=${encodeURIComponent(domain)}`,
+      `https://api.ahrefs.com/v3/domain-metrics?target=${encodeURIComponent(domain)}&metrics=domain_rating`,
       {
         headers: {
           'Accept': 'application/json',
@@ -37,7 +37,7 @@ serve(async (req) => {
       console.error(`Ahrefs API error: ${response.status} ${response.statusText}`)
       const errorText = await response.text()
       console.error(`Error details: ${errorText}`)
-      throw new Error(`Ahrefs API error: ${response.status} ${response.statusText}`)
+      throw new Error(`Ahrefs API error: ${response.status} ${response.statusText} - ${errorText}`)
     }
 
     const data = await response.json()
