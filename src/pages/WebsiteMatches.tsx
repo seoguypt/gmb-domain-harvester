@@ -21,7 +21,7 @@ const WebsiteMatches = () => {
         .from('domain_checks')
         .select('*')
         .not('listing', 'is', null)
-        .eq('listing->matchType', 'website');
+        .filter('listing->matchType', 'eq', 'website');
       
       if (error) throw error;
       return data as DomainCheck[];
