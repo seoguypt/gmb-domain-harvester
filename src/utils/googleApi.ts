@@ -10,7 +10,7 @@ let placesService: google.maps.places.PlacesService | null = null;
 
 export const initGoogleMapsApi = async () => {
   const loader = new Loader({
-    apiKey: "", // We'll need to set this up
+    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
     version: "weekly",
     libraries: ["places"]
   });
