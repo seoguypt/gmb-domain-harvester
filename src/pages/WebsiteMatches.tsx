@@ -29,6 +29,7 @@ const WebsiteMatches = () => {
       
       if (error) throw error;
       
+      // Safely cast the data and ensure it matches our expected type
       return data.map(item => ({
         ...item,
         listing: item.listing as GMBListing
