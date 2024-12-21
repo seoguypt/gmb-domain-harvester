@@ -83,12 +83,18 @@ export function DomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         
-        // Check if we have a recent cached result
-        const { data: cachedCheck } = await supabase
-          .from('domain_checks')
-          .select('*')
-          .eq('domain', domain)
-          .maybeSingle();
+        let cachedCheck = null;
+        try {
+          const { data } = await supabase
+            .from('domain_checks')
+            .select('*')
+            .eq('domain', domain)
+            .maybeSingle();
+          
+          cachedCheck = data;
+        } catch (error) {
+          console.error(`Error fetching cached result for ${domain}:`, error);
+        }
 
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
