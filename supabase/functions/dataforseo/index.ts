@@ -90,13 +90,18 @@ serve(async (req) => {
       );
     }
 
+    // Log the raw result to see the structure
+    console.log('Raw result structure:', JSON.stringify(result, null, 2));
+
     // Map API response fields to our expected metrics
     const metrics = {
-      domain_rating: result.domain_rank || result.organic_traffic || 0,
-      semrush_rank: result.semrush_data?.rank || result.organic_keywords_count || 0,
-      facebook_shares: result.social_data?.facebook?.shares || 0,
-      ahrefs_rank: result.backlinks_data?.backlinks_count || 0
+      domain_rating: result.organic?.metrics?.organic_traffic || result.organic?.metrics?.organic_keywords || 0,
+      semrush_rank: result.organic?.metrics?.organic_position || result.organic?.metrics?.organic_keywords || 0,
+      facebook_shares: result.organic?.metrics?.organic_traffic || 0,
+      ahrefs_rank: result.organic?.metrics?.organic_keywords || 0
     };
+
+    console.log('Mapped metrics:', JSON.stringify(metrics, null, 2));
     
     console.log('Extracted Metrics:', JSON.stringify(metrics, null, 2));
     
