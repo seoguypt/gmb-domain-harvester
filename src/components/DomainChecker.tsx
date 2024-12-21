@@ -9,6 +9,7 @@ import { BulkResults } from "./domain-checker/BulkResults";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
+import { Trash2 } from "lucide-react";
 
 interface GMBListing {
   businessName: string;
@@ -29,6 +30,7 @@ export function DomainChecker() {
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [isClearing, setIsClearing] = useState(false);
 
   const initializeApi = async () => {
     if (!apiKey) {
@@ -58,6 +60,33 @@ export function DomainChecker() {
       setIsApiInitialized(false);
     } finally {
       setIsInitializing(false);
+    }
+  };
+
+  const clearCache = async () => {
+    setIsClearing(true);
+    try {
+      const { error } = await supabase
+        .from('domain_checks')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
+
+      if (error) throw error;
+
+      setResults([]);
+      toast({
+        title: "Cache Cleared",
+        description: "All cached domain checks have been cleared",
+      });
+    } catch (error) {
+      console.error("Error clearing cache:", error);
+      toast({
+        title: "Error",
+        description: "Failed to clear cache",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -155,11 +184,22 @@ export function DomainChecker() {
             <p className="text-muted-foreground">
               Check if domains have active Google My Business listings
             </p>
-            <Link to="/found">
-              <Button variant="outline" className="mt-2">
-                View Found Domains
+            <div className="flex justify-center gap-2 mt-2">
+              <Link to="/found">
+                <Button variant="outline">
+                  View Found Domains
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                onClick={clearCache}
+                disabled={isClearing}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isClearing ? "Clearing..." : "Clear Cache"}
               </Button>
-            </Link>
+            </div>
           </div>
 
           <div className="space-y-4">
