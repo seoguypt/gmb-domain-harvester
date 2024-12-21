@@ -32,13 +32,13 @@ const WebsiteMatches = () => {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   
   const { data: matches, isLoading } = useQuery({
-    queryKey: ['website-matches'],
+    queryKey: ['name-matches'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('domain_checks')
         .select('*')
         .not('listing', 'is', null)
-        .contains('listing', { matchType: 'website' });
+        .contains('listing', { matchType: 'name' });
       
       if (error) throw error;
       
@@ -84,7 +84,7 @@ const WebsiteMatches = () => {
         {!matches?.length && (
           <TableRow>
             <TableCell colSpan={4} className="text-center py-8">
-              No website matches found
+              No name matches found
             </TableCell>
           </TableRow>
         )}
@@ -131,7 +131,7 @@ const WebsiteMatches = () => {
       ))}
       {!matches?.length && (
         <div className="col-span-full text-center py-8">
-          No website matches found
+          No name matches found
         </div>
       )}
     </div>
@@ -147,7 +147,7 @@ const WebsiteMatches = () => {
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
-            <h1 className="text-3xl font-semibold tracking-tight">Website Matches</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">Name Matches</h1>
           </div>
           <div className="flex gap-2">
             <Button

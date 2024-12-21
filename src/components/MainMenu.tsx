@@ -17,7 +17,7 @@ export function MainMenu() {
             </Link>
             <Link to="/website-matches" className="flex items-center text-sm hover:text-primary transition-colors">
               <List className="w-4 h-4 mr-2" />
-              Website Matches
+              Name Matches
             </Link>
             <Link to="/found-ones" className="flex items-center text-sm hover:text-primary transition-colors">
               <Database className="w-4 h-4 mr-2" />
