@@ -46,7 +46,6 @@ export const initGoogleMapsApi = async (apiKey: string) => {
 };
 
 const cleanDomain = (domain: string): string => {
-  // Remove protocol, www, trailing slashes, and TLD
   return domain.toLowerCase()
     .replace(/^https?:\/\//i, '')
     .replace(/^www\./i, '')
@@ -55,29 +54,24 @@ const cleanDomain = (domain: string): string => {
 };
 
 const cleanBusinessName = (domain: string): string => {
-  // Remove TLD and common subdomain
   let name = cleanDomain(domain);
   
-  // Remove common business suffixes
   const suffixes = [
     "ltd", "limited", "inc", "incorporated", "llc", "corp", "corporation",
     "co", "company", "services", "solutions", "group", "holdings", "enterprises"
   ];
   
-  // Remove suffixes if they appear at the end of the name
   suffixes.forEach(suffix => {
     const suffixPattern = new RegExp(`[-_]?${suffix}$`);
     name = name.replace(suffixPattern, '');
   });
   
-  // Replace dashes and underscores with spaces
   name = name.replace(/[-_]/g, ' ');
   
   return name.trim();
 };
 
 const normalizeDomain = (url: string): string => {
-  // Remove protocol, trailing slashes, and convert to lowercase
   return url.toLowerCase()
     .replace(/^https?:\/\//i, '')
     .replace(/\/+$/, '')  // Remove trailing slashes
@@ -88,7 +82,6 @@ const domainsMatch = (domain1: string, domain2: string): boolean => {
   const norm1 = normalizeDomain(domain1);
   const norm2 = normalizeDomain(domain2);
   
-  // Compare with and without www
   return norm1 === norm2 || 
          `www.${norm1}` === norm2 || 
          norm1 === `www.${norm2}`;
@@ -101,6 +94,7 @@ export const searchGMBListing = (domain: string): Promise<{
   type: string;
   placeId: string;
   matchType: "website" | "name" | null;
+  websiteUrl?: string; // Add this field to store the business's actual website
 } | null> => {
   return new Promise((resolve, reject) => {
     if (!placesService) {
@@ -138,11 +132,8 @@ export const searchGMBListing = (domain: string): Promise<{
                 Place name: ${businessNameLower}
                 Cleaned name: ${cleanedName}`);
               
-              // Website match using the new flexible domain comparison
               const websiteMatch = placeWebsite && domainsMatch(domain, placeWebsite);
               
-              // Name match remains the same - must contain the entire cleaned domain name
-              // or vice versa, and be at least 70% similar in length
               const nameMatch = (businessNameLower.includes(cleanedName) || 
                                cleanedName.includes(businessNameLower)) &&
                                Math.min(businessNameLower.length, cleanedName.length) / 
@@ -156,7 +147,8 @@ export const searchGMBListing = (domain: string): Promise<{
                   rating: place.rating || 0,
                   type: place.types?.[0] || "Local Business",
                   placeId: placeId,
-                  matchType: websiteMatch ? "website" : "name"
+                  matchType: websiteMatch ? "website" : "name",
+                  websiteUrl: place.website || undefined
                 });
               } else {
                 console.log('No match - criteria not met');

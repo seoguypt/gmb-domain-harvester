@@ -9,6 +9,7 @@ interface GMBListing {
   type: string;
   placeId: string;
   matchType: "website" | "name" | null;
+  websiteUrl?: string;
 }
 
 interface BulkResultsProps {
@@ -75,13 +76,27 @@ export function BulkResults({ results }: BulkResultsProps) {
               </TableCell>
               <TableCell>
                 {result.listing?.matchType && (
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    result.listing.matchType === 'website' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {result.listing.matchType === 'website' ? 'Website Match' : 'Name Match'}
-                  </span>
+                  <div className="space-y-1">
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      result.listing.matchType === 'website' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {result.listing.matchType === 'website' ? 'Website Match' : 'Name Match'}
+                    </span>
+                    {result.listing.matchType === 'name' && result.listing.websiteUrl && (
+                      <div className="text-xs text-muted-foreground">
+                        <a 
+                          href={result.listing.websiteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
+                          {result.listing.websiteUrl}
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 )}
               </TableCell>
             </TableRow>
