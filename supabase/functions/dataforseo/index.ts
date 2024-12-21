@@ -92,10 +92,10 @@ serve(async (req) => {
 
     // Map API response fields to our expected metrics
     const metrics = {
-      domain_rating: result.metrics?.domain_rank || null,
-      semrush_rank: result.metrics?.semrush_rank || null,
-      facebook_shares: result.metrics?.social?.facebook_shares || null,
-      ahrefs_rank: result.metrics?.backlinks_rank || null
+      domain_rating: result.metrics?.domain_rank || result.metrics?.trust_score || 0,
+      semrush_rank: result.metrics?.semrush_rank || result.metrics?.rank_absolute || 0,
+      facebook_shares: result.metrics?.social?.facebook_shares || 0,
+      ahrefs_rank: result.metrics?.backlinks_rank || result.metrics?.rank_absolute || 0
     };
     
     console.log('Extracted Metrics:', JSON.stringify(metrics, null, 2));
