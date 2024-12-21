@@ -25,39 +25,45 @@ export function DomainChecker() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
-      <Card className="w-full max-w-2xl p-8 glass-card animate-fadeIn">
-        <div className="space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight">Domain Checker</h1>
-            <p className="text-muted-foreground">
-              Check if domains have active Google My Business listings
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto p-4">
+        <Card className="p-8 glass-card animate-fadeIn mb-8">
+          <div className="space-y-8">
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight">Domain Checker</h1>
+              <p className="text-muted-foreground">
+                Check if domains have active Google My Business listings
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <APIKeys
+                googleApiKey={googleApiKey}
+                setGoogleApiKey={setGoogleApiKey}
+                isInitializing={isInitializing}
+                onInitialize={() => initializeApi(googleApiKey)}
+                isApiInitialized={isApiInitialized}
+              />
+
+              <DomainInput
+                domains={domains}
+                setDomains={setDomains}
+                isLoading={isLoading}
+                isApiInitialized={isApiInitialized}
+                onCheck={handleCheck}
+              />
+
+              <ProgressIndicator isLoading={isLoading} progress={progress} />
+            </div>
           </div>
+        </Card>
 
-          <div className="space-y-4">
-            <APIKeys
-              googleApiKey={googleApiKey}
-              setGoogleApiKey={setGoogleApiKey}
-              isInitializing={isInitializing}
-              onInitialize={() => initializeApi(googleApiKey)}
-              isApiInitialized={isApiInitialized}
-            />
-
-            <DomainInput
-              domains={domains}
-              setDomains={setDomains}
-              isLoading={isLoading}
-              isApiInitialized={isApiInitialized}
-              onCheck={handleCheck}
-            />
-
-            <ProgressIndicator isLoading={isLoading} progress={progress} />
+        {results.length > 0 && (
+          <div className="w-full animate-fadeIn">
+            <BulkResults results={results} />
           </div>
-
-          {results.length > 0 && <BulkResults results={results} />}
-        </div>
-      </Card>
+        )}
+      </div>
     </div>
   );
 }
