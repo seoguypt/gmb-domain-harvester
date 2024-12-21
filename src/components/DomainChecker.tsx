@@ -7,6 +7,7 @@ import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
 import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
 import type { DomainResult } from "@/utils/google/types";
+import { supabase } from "@/integrations/supabase/client";
 
 export function DomainChecker() {
   const [domains, setDomains] = useState("");
@@ -81,23 +82,58 @@ export function DomainChecker() {
       const newResults = [];
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
-        try {
-          const listing = await searchGMBListing(domain);
-          newResults.push({ 
-            domain,
-            listing,
-            tld: domain.split('.').pop() || '',
-            domainAge: 'N/A'
-          });
-        } catch (error) {
-          console.error(`Error checking domain ${domain}:`, error);
-          newResults.push({ 
-            domain,
-            listing: null,
-            tld: domain.split('.').pop() || '',
-            domainAge: 'N/A'
-          });
+        
+        // Check if we have a recent cached result
+        const { data: cachedCheck } = await supabase
+          .from('domain_checks')
+          .select('*')
+          .eq('domain', domain)
+          .single();
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        let listing = null;
+        
+        // If we have a cached result less than a week old, use it
+        if (cachedCheck && new Date(cachedCheck.checked_at) > oneWeekAgo) {
+          console.log(`Using cached result for ${domain}`);
+          listing = cachedCheck.listing;
+        } else {
+          // Otherwise, fetch new data
+          try {
+            listing = await searchGMBListing(domain);
+            
+            // Store or update the result in the database
+            if (cachedCheck) {
+              await supabase
+                .from('domain_checks')
+                .update({ 
+                  listing,
+                  checked_at: new Date().toISOString()
+                })
+                .eq('domain', domain);
+            } else {
+              await supabase
+                .from('domain_checks')
+                .insert({ 
+                  domain,
+                  listing,
+                  checked_at: new Date().toISOString()
+                });
+            }
+          } catch (error) {
+            console.error(`Error checking domain ${domain}:`, error);
+          }
         }
+
+        newResults.push({ 
+          domain,
+          listing,
+          tld: domain.split('.').pop() || '',
+          domainAge: 'N/A'
+        });
+        
         setProgress(((i + 1) / domainList.length) * 100);
       }
       

@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      domain_checks: {
+        Row: {
+          checked_at: string | null
+          domain: string
+          id: string
+          listing: Json | null
+        }
+        Insert: {
+          checked_at?: string | null
+          domain: string
+          id?: string
+          listing?: Json | null
+        }
+        Update: {
+          checked_at?: string | null
+          domain?: string
+          id?: string
+          listing?: Json | null
+        }
+        Relationships: []
+      }
       secrets: {
         Row: {
           created_at: string
