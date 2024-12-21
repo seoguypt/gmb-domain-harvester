@@ -5,8 +5,6 @@ import { Loader2 } from "lucide-react";
 interface APIKeysProps {
   googleApiKey: string;
   setGoogleApiKey: (key: string) => void;
-  ahrefsApiKey: string;
-  setAhrefsApiKey: (key: string) => void;
   isInitializing: boolean;
   onInitialize: () => Promise<void>;
   isApiInitialized: boolean;
@@ -15,8 +13,6 @@ interface APIKeysProps {
 export function APIKeys({
   googleApiKey,
   setGoogleApiKey,
-  ahrefsApiKey,
-  setAhrefsApiKey,
   isInitializing,
   onInitialize,
   isApiInitialized,
@@ -44,16 +40,6 @@ export function APIKeys({
             )}
           </Button>
         </div>
-      </div>
-      
-      <div className="space-y-2">
-        <Input
-          placeholder="Enter Ahrefs API Key"
-          value={ahrefsApiKey}
-          onChange={(e) => setAhrefsApiKey(e.target.value)}
-          className="text-lg"
-          type="password"
-        />
       </div>
     </div>
   );

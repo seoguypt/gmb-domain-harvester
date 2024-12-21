@@ -9,7 +9,6 @@ import { useDomainChecker } from "@/hooks/useDomainChecker";
 export function DomainChecker() {
   const [domains, setDomains] = useState("");
   const [googleApiKey, setGoogleApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
-  const [ahrefsApiKey, setAhrefsApiKey] = useState("");
   
   const {
     isLoading,
@@ -22,7 +21,7 @@ export function DomainChecker() {
   } = useDomainChecker();
 
   const handleCheck = async () => {
-    await checkDomains(domains, ahrefsApiKey);
+    await checkDomains(domains);
   };
 
   return (
@@ -40,8 +39,6 @@ export function DomainChecker() {
             <APIKeys
               googleApiKey={googleApiKey}
               setGoogleApiKey={setGoogleApiKey}
-              ahrefsApiKey={ahrefsApiKey}
-              setAhrefsApiKey={setAhrefsApiKey}
               isInitializing={isInitializing}
               onInitialize={() => initializeApi(googleApiKey)}
               isApiInitialized={isApiInitialized}

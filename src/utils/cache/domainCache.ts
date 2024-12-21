@@ -73,7 +73,6 @@ export const updateDomainCache = async (domain: string, result: Partial<DomainRe
         .from('domain_checks')
         .update({ 
           listing: jsonListing,
-          domain_rating: result.domainRating,
           checked_at: new Date().toISOString()
         })
         .eq('domain', domain);
@@ -83,7 +82,6 @@ export const updateDomainCache = async (domain: string, result: Partial<DomainRe
         .insert({ 
           domain,
           listing: jsonListing,
-          domain_rating: result.domainRating,
           checked_at: new Date().toISOString()
         });
     }

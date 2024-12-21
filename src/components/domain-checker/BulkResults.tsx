@@ -34,7 +34,6 @@ export function BulkResults({ results }: BulkResultsProps) {
               <TableHead className="w-1/3">GMB Listing</TableHead>
               <TableHead className="w-1/4">Match Type</TableHead>
               <TableHead>Domain Age</TableHead>
-              <TableHead>Domain Rating</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -113,11 +112,6 @@ export function BulkResults({ results }: BulkResultsProps) {
                 <TableCell>
                   <span className="text-sm">
                     {result.domainAge}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">
-                    {result.domainRating ?? 'N/A'}
                   </span>
                 </TableCell>
               </TableRow>

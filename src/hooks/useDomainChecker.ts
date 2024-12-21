@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
-import { fetchDomainRating } from "@/utils/api/domainRating";
 import { getCachedDomainCheck, updateDomainCache } from "@/utils/cache/domainCache";
 import type { DomainResult } from "@/utils/google/types";
 
@@ -44,7 +43,7 @@ export function useDomainChecker() {
     }
   };
 
-  const checkDomains = async (domains: string, ahrefsApiKey: string) => {
+  const checkDomains = async (domains: string) => {
     if (!domains.trim()) {
       toast({
         title: "Please enter domains",
@@ -82,29 +81,14 @@ export function useDomainChecker() {
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
         let listing = null;
-        let domainRating = null;
         
         if (cachedCheck && new Date(cachedCheck.checked_at) > oneWeekAgo) {
           console.log(`Using cached result for ${domain}`);
           listing = cachedCheck.listing;
-          domainRating = cachedCheck.domain_rating;
         } else {
           try {
             listing = await searchGMBListing(domain);
-            
-            if (ahrefsApiKey) {
-              try {
-                domainRating = await fetchDomainRating(domain, ahrefsApiKey);
-              } catch (error) {
-                toast({
-                  title: "Domain Rating Error",
-                  description: `Failed to fetch domain rating for ${domain}`,
-                  variant: "destructive",
-                });
-              }
-            }
-            
-            await updateDomainCache(domain, { listing, domainRating });
+            await updateDomainCache(domain, { listing });
           } catch (error) {
             console.error(`Error checking domain ${domain}:`, error);
           }
@@ -114,8 +98,7 @@ export function useDomainChecker() {
           domain,
           listing,
           tld: domain.split('.').pop() || '',
-          domainAge: 'N/A',
-          domainRating
+          domainAge: 'N/A'
         });
         
         setProgress(((i + 1) / domainList.length) * 100);
