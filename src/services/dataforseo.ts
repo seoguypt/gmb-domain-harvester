@@ -10,8 +10,6 @@ export async function fetchDomainMetrics(domain: string) {
       body: JSON.stringify({ domain })
     });
 
-    console.log('DataForSEO response status:', response.status);
-
     if (!response.ok) {
       const text = await response.text();
       console.error('DataForSEO error response:', text);
@@ -20,6 +18,11 @@ export async function fetchDomainMetrics(domain: string) {
 
     const data = await response.json();
     console.log('DataForSEO raw response:', data);
+
+    if (data.error) {
+      console.error('DataForSEO API error:', data.error);
+      return null;
+    }
 
     const result = data?.tasks?.[0]?.result?.[0];
     console.log('DataForSEO result:', result);
