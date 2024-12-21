@@ -17,8 +17,14 @@ export const initGoogleMapsApi = async () => {
       .eq('name', 'GOOGLE_MAPS_API_KEY')
       .maybeSingle();
 
-    if (error) throw error;
-    if (!data) throw new Error('Google Maps API key not found');
+    if (error) {
+      console.error('Error fetching API key:', error);
+      throw error;
+    }
+    if (!data) {
+      console.error('Google Maps API key not found in secrets');
+      throw new Error('Google Maps API key not found');
+    }
 
     const loader = new Loader({
       apiKey: data.value,
