@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
 interface APIKeyInputProps {
@@ -18,8 +17,6 @@ export function APIKeyInput({
   onInitialize,
   isApiInitialized,
 }: APIKeyInputProps) {
-  const { toast } = useToast();
-
   return (
     <div className="flex gap-2">
       <Input
@@ -28,10 +25,11 @@ export function APIKeyInput({
         onChange={(e) => setApiKey(e.target.value)}
         className="text-lg"
         type="password"
+        disabled={isApiInitialized}
       />
       <Button
         onClick={onInitialize}
-        disabled={isInitializing || !apiKey}
+        disabled={isInitializing || !apiKey || isApiInitialized}
         className="min-w-[100px]"
       >
         {isInitializing ? (
