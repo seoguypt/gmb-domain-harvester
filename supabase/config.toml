@@ -1,1 +1,9 @@
 project_id = "dqkoklfdlqabquqqofsg"
+
+[api]
+enabled = true
+url = "https://dqkoklfdlqabquqqofsg.supabase.co"
+
+[[functions]]
+name = "dataforseo"
+verify_jwt = false
