@@ -4,35 +4,61 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BulkResults } from "@/components/domain-checker/BulkResults";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const NameMatches = () => {
   const [results, setResults] = useState<{ domain: string; listing: any; }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchNameMatches = async () => {
+    const { data, error } = await supabase
+      .from('domain_checks')
+      .select('*')
+      .not('listing', 'is', null)
+      .contains('listing', { matchType: 'name' })
+      .order('checked_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching name matches:', error);
+      return;
+    }
+
+    const formattedResults = data.map(item => ({
+      domain: item.domain,
+      listing: item.listing
+    }));
+
+    setResults(formattedResults);
+    setIsLoading(false);
+  };
+
+  const clearAllData = async () => {
+    try {
+      const { error } = await supabase
+        .from('domain_checks')
+        .delete()
+        .contains('listing', { matchType: 'name' });
+
+      if (error) throw error;
+
+      setResults([]);
+      toast({
+        title: "Success",
+        description: "All name matches have been cleared",
+      });
+    } catch (error) {
+      console.error('Error clearing data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear name matches",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchNameMatches = async () => {
-      const { data, error } = await supabase
-        .from('domain_checks')
-        .select('*')
-        .not('listing', 'is', null)
-        .contains('listing', { matchType: 'name' })
-        .order('checked_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching name matches:', error);
-        return;
-      }
-
-      const formattedResults = data.map(item => ({
-        domain: item.domain,
-        listing: item.listing
-      }));
-
-      setResults(formattedResults);
-      setIsLoading(false);
-    };
-
     fetchNameMatches();
   }, []);
 
@@ -47,6 +73,14 @@ const NameMatches = () => {
                 Back
               </Button>
             </Link>
+            <Button
+              variant="destructive"
+              onClick={clearAllData}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear All
+            </Button>
           </div>
 
           <div className="text-center space-y-2">
