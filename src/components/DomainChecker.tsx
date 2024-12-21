@@ -7,7 +7,6 @@ import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
 import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
-import { supabase } from "@/integrations/supabase/client";
 import type { DomainResult } from "@/utils/google/types";
 
 export function DomainChecker() {
@@ -19,6 +18,8 @@ export function DomainChecker() {
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
+  const [dataForSeoLogin, setDataForSeoLogin] = useState("");
+  const [dataForSeoPassword, setDataForSeoPassword] = useState("");
 
   const initializeApi = async () => {
     if (!apiKey) {
@@ -86,7 +87,7 @@ export function DomainChecker() {
         try {
           const [listing, domainAge] = await Promise.all([
             searchGMBListing(domain),
-            getDomainAge(domain)
+            getDomainAge(domain, dataForSeoLogin, dataForSeoPassword)
           ]);
           
           newResults.push({ 
@@ -143,6 +144,10 @@ export function DomainChecker() {
               isInitializing={isInitializing}
               onInitialize={initializeApi}
               isApiInitialized={isApiInitialized}
+              dataForSeoLogin={dataForSeoLogin}
+              setDataForSeoLogin={setDataForSeoLogin}
+              dataForSeoPassword={dataForSeoPassword}
+              setDataForSeoPassword={setDataForSeoPassword}
             />
 
             <DomainInput

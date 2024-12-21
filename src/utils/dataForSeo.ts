@@ -1,27 +1,12 @@
-import { supabase } from "@/integrations/supabase/client";
-
 const BASE_URL = 'https://api.dataforseo.com/v3';
 
-export async function getDomainAge(domain: string) {
+export async function getDomainAge(domain: string, login?: string, password?: string) {
   try {
-    const { data: loginData } = await supabase
-      .from('secrets')
-      .select('value')
-      .eq('name', 'DATAFORSEO_LOGIN')
-      .maybeSingle();
-
-    const { data: passwordData } = await supabase
-      .from('secrets')
-      .select('value')
-      .eq('name', 'DATAFORSEO_PASSWORD')
-      .maybeSingle();
-
-    if (!loginData?.value || !passwordData?.value) {
-      console.error('DataForSEO credentials not found');
-      return 'N/A (API credentials not set)';
+    if (!login || !password) {
+      return 'N/A (API credentials required)';
     }
 
-    const auth = Buffer.from(`${loginData.value}:${passwordData.value}`).toString('base64');
+    const auth = Buffer.from(`${login}:${password}`).toString('base64');
     
     const response = await fetch(`${BASE_URL}/domain_analytics/whois/live`, {
       method: 'POST',
