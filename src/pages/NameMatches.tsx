@@ -7,8 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ViewToggle } from "@/components/name-matches/ViewToggle";
 import { MatchesTable } from "@/components/name-matches/MatchesTable";
 import { MatchesGrid } from "@/components/name-matches/MatchesGrid";
+import { DomainResult } from "@/utils/google/types";
 
-export default function WebsiteMatches() {
+export default function NameMatches() {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   
   const { data: matches, isLoading } = useQuery({
@@ -21,7 +22,14 @@ export default function WebsiteMatches() {
         .contains('listing', { matchType: 'name' });
       
       if (error) throw error;
-      return data;
+
+      // Transform the data to match DomainResult type
+      return data.map(item => ({
+        domain: item.domain,
+        listing: item.listing as any,
+        tld: item.domain.split('.').pop() || '',
+        domainAge: 'Unknown', // You might want to calculate this based on your needs
+      })) as DomainResult[];
     },
   });
 
