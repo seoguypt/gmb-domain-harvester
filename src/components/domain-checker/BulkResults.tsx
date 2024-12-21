@@ -35,7 +35,16 @@ export function BulkResults({ results }: BulkResultsProps) {
                         className="flex items-center gap-2 text-primary cursor-pointer hover:underline"
                       >
                         <Link className="h-4 w-4" />
-                        Yes
+                        {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) ? (
+                          <div className="flex flex-col">
+                            <span>Yes</span>
+                            <span className="text-xs text-muted-foreground">
+                              {result.listing.websiteUrl}
+                            </span>
+                          </div>
+                        ) : (
+                          'Yes'
+                        )}
                       </a>
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
