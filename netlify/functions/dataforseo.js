@@ -27,7 +27,10 @@ const handler = async (event) => {
       };
     }
 
-    const auth = Buffer.from(`${process.env.DATAFORSEO_LOGIN}:${process.env.DATAFORSEO_PASSWORD}`).toString('base64');
+    // Hardcoded credentials for testing
+    const login = 'moneyfarm@gmail.com';
+    const password = 'f0857984f7921cba';
+    const auth = Buffer.from(`${login}:${password}`).toString('base64');
     
     const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/whois/overview/live', {
       method: 'POST',
@@ -40,7 +43,13 @@ const handler = async (event) => {
       }])
     });
 
+    console.log('DataForSEO response status:', response.status);
     const data = await response.json();
+    console.log('DataForSEO response:', {
+      status_code: data.status_code,
+      status_message: data.status_message
+    });
+
     return {
       statusCode: 200,
       headers: {
@@ -53,6 +62,7 @@ const handler = async (event) => {
     };
 
   } catch (error) {
+    console.error('Function error:', error);
     return {
       statusCode: 500,
       headers: {
