@@ -1,20 +1,12 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Progress } from "@/components/ui/progress";
-import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
+import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
-
-interface GMBListing {
-  businessName: string;
-  address: string;
-  rating: number;
-  type: string;
-  placeId: string;
-  matchType: "website" | "name" | null;
-}
+import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
+import type { GMBListing } from "@/utils/google";
 
 export function DomainChecker() {
   const [domains, setDomains] = useState("");
@@ -96,7 +88,6 @@ export function DomainChecker() {
           console.error(`Error checking domain ${domain}:`, error);
           newResults.push({ domain, listing: null });
         }
-        // Update progress after each domain check
         setProgress(((i + 1) / domainList.length) * 100);
       }
       
@@ -146,14 +137,7 @@ export function DomainChecker() {
               onCheck={checkDomains}
             />
 
-            {isLoading && (
-              <div className="space-y-2">
-                <Progress value={progress} className="w-full" />
-                <p className="text-sm text-center text-muted-foreground">
-                  Checking domains... {Math.round(progress)}%
-                </p>
-              </div>
-            )}
+            <ProgressIndicator isLoading={isLoading} progress={progress} />
           </div>
 
           {results.length > 0 && <BulkResults results={results} />}
