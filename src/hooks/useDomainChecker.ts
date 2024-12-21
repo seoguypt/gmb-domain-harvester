@@ -51,41 +51,18 @@ export function useDomainChecker() {
       .filter(d => d);
 
     try {
-      const BATCH_SIZE = 20; // Process more domains concurrently with rate limiting
-      const UPDATE_INTERVAL = 10000; // 10 seconds
-      let processedCount = 0;
-      let batchResults: { domain: string; listing: GMBListing | null; }[] = [];
-      let lastUpdateTime = Date.now();
-
-      // Process domains in batches
-      for (let i = 0; i < domainList.length; i += BATCH_SIZE) {
-        const batch = domainList.slice(i, Math.min(i + BATCH_SIZE, domainList.length));
-        
-        // Process batch concurrently - rate limiter in searchGMBListing handles the throttling
-        const batchPromises = batch.map(async (domain) => {
-          try {
-            const listing = await searchGMBListing(domain);
-            return { domain, listing };
-          } catch (error) {
-            console.error(`Error checking domain ${domain}:`, error);
-            return { domain, listing: null };
-          }
-        });
-
-        // Wait for current batch to complete
-        const currentBatchResults = await Promise.all(batchPromises);
-        processedCount += currentBatchResults.length;
-        batchResults.push(...currentBatchResults);
-        
-        // Update results if enough time has passed or this is the last batch
-        const currentTime = Date.now();
-        if (currentTime - lastUpdateTime >= UPDATE_INTERVAL || processedCount === domainList.length) {
-          setResults(prev => [...prev, ...batchResults]);
-          batchResults = [];
-          lastUpdateTime = currentTime;
+      // Process one domain at a time
+      for (let i = 0; i < domainList.length; i++) {
+        const domain = domainList[i];
+        try {
+          const listing = await searchGMBListing(domain);
+          setResults(prev => [...prev, { domain, listing }]);
+        } catch (error) {
+          console.error(`Error checking domain ${domain}:`, error);
+          setResults(prev => [...prev, { domain, listing: null }]);
         }
         
-        setProgress((processedCount / domainList.length) * 100);
+        setProgress(((i + 1) / domainList.length) * 100);
       }
 
       toast({

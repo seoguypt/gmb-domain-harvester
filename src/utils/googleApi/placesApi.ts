@@ -1,9 +1,5 @@
 import { NETLIFY_FUNCTIONS_URL } from "./config";
 import { cleanBusinessName } from "./domainUtils";
-import { RateLimiter, withRetry } from "./rateLimiter";
-
-// Create a rate limiter instance (5 requests per second)
-const rateLimiter = new RateLimiter(5);
 
 export const initGoogleMapsApi = async (apiKey: string) => {
   try {
@@ -32,7 +28,7 @@ export const searchGMBListing = async (domain: string): Promise<{
     const cleanedName = cleanBusinessName(domain);
     console.log(`Searching for business: "${cleanedName}" (Domain: ${domain})`);
 
-    const response = await rateLimiter.add(() => withRetry(() => fetch(`${NETLIFY_FUNCTIONS_URL}/places`, {
+    const response = await fetch(`${NETLIFY_FUNCTIONS_URL}/places`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,7 +37,7 @@ export const searchGMBListing = async (domain: string): Promise<{
         domain,
         query: cleanedName
       })
-    })));
+    });
 
     if (!response.ok) {
       throw new Error(`Places API request failed: ${response.statusText}`);
