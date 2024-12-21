@@ -16,7 +16,14 @@ interface GMBListing {
 export function useDomainChecker() {
   const [domains, setDomains] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<{ domain: string; listing: GMBListing | null; }[]>([]);
+  const [results, setResults] = useState<{
+    domain: string;
+    listing: GMBListing | null;
+    domain_rating?: number;
+    semrush_rank?: number;
+    facebook_shares?: number;
+    ahrefs_rank?: number;
+  }[]>([]);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
@@ -31,8 +38,17 @@ export function useDomainChecker() {
         return null;
       }
 
-      console.log('DataForSEO response:', data);
-      return data;
+      if (data?.tasks?.[0]?.result?.[0]) {
+        const metrics = data.tasks[0].result[0];
+        console.log('DataForSEO metrics:', metrics);
+        return {
+          domain_rating: metrics.domain_rank,
+          semrush_rank: metrics.semrush_rank,
+          facebook_shares: metrics.facebook_shares,
+          ahrefs_rank: metrics.ahrefs_rank
+        };
+      }
+      return null;
     } catch (error) {
       console.error('Error calling DataForSEO function:', error);
       return null;
@@ -74,39 +90,49 @@ export function useDomainChecker() {
         try {
           const { data: cachedResult } = await supabase
             .from('domain_checks')
-            .select('listing')
+            .select('*')
             .eq('domain', domain)
             .maybeSingle();
 
           let listing;
-          let analyticsData;
+          let metrics = null;
 
           if (cachedResult) {
             console.log('Cache hit for domain:', domain);
             listing = cachedResult.listing;
+            metrics = {
+              domain_rating: cachedResult.domain_rating,
+              semrush_rank: cachedResult.semrush_rank,
+              facebook_shares: cachedResult.facebook_shares,
+              ahrefs_rank: cachedResult.ahrefs_rank
+            };
           } else {
             console.log('Cache miss for domain:', domain);
             listing = await searchGMBListing(domain);
-            analyticsData = await fetchDomainAnalytics(domain);
+            metrics = await fetchDomainAnalytics(domain);
 
-            if (listing || analyticsData) {
+            if (listing || metrics) {
               await supabase
                 .from('domain_checks')
                 .insert({
                   domain: domain,
                   listing: listing,
                   checked_at: new Date().toISOString(),
-                  ...(analyticsData?.tasks?.[0]?.result?.[0]?.metrics && {
-                    domain_rating: analyticsData.tasks[0].result[0].metrics.domain_rank,
-                    semrush_rank: analyticsData.tasks[0].result[0].metrics.semrush_rank,
-                    facebook_shares: analyticsData.tasks[0].result[0].metrics.facebook_shares,
-                    ahrefs_rank: analyticsData.tasks[0].result[0].metrics.ahrefs_rank
+                  ...(metrics && {
+                    domain_rating: metrics.domain_rating,
+                    semrush_rank: metrics.semrush_rank,
+                    facebook_shares: metrics.facebook_shares,
+                    ahrefs_rank: metrics.ahrefs_rank
                   })
                 });
             }
           }
           
-          newResults.push({ domain, listing });
+          newResults.push({ 
+            domain, 
+            listing,
+            ...metrics
+          });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
           newResults.push({ domain, listing: null });
