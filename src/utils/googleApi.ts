@@ -42,6 +42,8 @@ export const initGoogleMapsApi = async () => {
     });
     
     placesService = new google.maps.places.PlacesService(map);
+    
+    return true;
   } catch (error) {
     console.error('Error initializing Google Maps API:', error);
     throw error;

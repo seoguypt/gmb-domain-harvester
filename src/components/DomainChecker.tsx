@@ -16,15 +16,21 @@ interface GMBListing {
 export function DomainChecker() {
   const [domain, setDomain] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [listing, setListing] = useState<GMBListing | null>(null);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
 
   useEffect(() => {
     const init = async () => {
+      setIsInitializing(true);
       try {
         await initGoogleMapsApi();
         setIsApiInitialized(true);
+        toast({
+          title: "API Initialized",
+          description: "Google Maps API is ready to use",
+        });
       } catch (error) {
         console.error("Failed to initialize Google Maps API:", error);
         toast({
@@ -32,6 +38,8 @@ export function DomainChecker() {
           description: "Failed to initialize Google Maps API. Please try again later.",
           variant: "destructive",
         });
+      } finally {
+        setIsInitializing(false);
       }
     };
     init();
@@ -102,15 +110,17 @@ export function DomainChecker() {
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               className="text-lg"
-              disabled={isLoading}
+              disabled={isLoading || isInitializing}
             />
             <Button
               onClick={checkDomain}
-              disabled={isLoading}
+              disabled={isLoading || isInitializing}
               className="min-w-[100px]"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isInitializing ? (
+                "Initializing..."
               ) : (
                 "Check"
               )}
