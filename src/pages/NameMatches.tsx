@@ -3,6 +3,7 @@ import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { BulkResults } from "../components/domain-checker/BulkResults";
 import { ArrowLeft, Trash2 } from "lucide-react";
+import { ExportButton } from "../components/domain-checker/ExportButton";
 import { useDomainChecker } from "../context/DomainCheckerContext";
 
 const NameMatches = () => {
@@ -19,14 +20,20 @@ const NameMatches = () => {
                 Back
               </Button>
             </Link>
-            <Button
-              variant="destructive"
-              onClick={clearNameMatches}
-              className="gap-2"
-            >
-              <Trash2 className="h-4 w-4" />
-              Clear All
-            </Button>
+            <div className="flex gap-2">
+              <ExportButton 
+                results={nameMatches} 
+                filename="name-matches" 
+              />
+              <Button
+                variant="destructive"
+                onClick={clearNameMatches}
+                className="gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Clear All
+              </Button>
+            </div>
           </div>
 
           <div className="text-center space-y-2">
