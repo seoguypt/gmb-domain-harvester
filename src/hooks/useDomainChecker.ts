@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useToast } from "../components/ui/use-toast";
 import { searchGMBListing } from "../utils/googleApi";
-import { fetchDomainMetrics } from "../services/dataforseo";
 
 interface GMBListing {
   businessName: string;
@@ -19,10 +18,6 @@ export function useDomainChecker() {
   const [results, setResults] = useState<{
     domain: string;
     listing: GMBListing | null;
-    domain_rating?: number;
-    semrush_rank?: number;
-    facebook_shares?: number;
-    ahrefs_rank?: number;
   }[]>([]);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
@@ -61,12 +56,9 @@ export function useDomainChecker() {
         const domain = domainList[i];
         try {
           const listing = await searchGMBListing(domain);
-          const metrics = await fetchDomainMetrics(domain);
-          
           newResults.push({ 
             domain, 
-            listing,
-            ...metrics
+            listing
           });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);

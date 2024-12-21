@@ -1,8 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_DATAFORSEO_LOGIN: string
-  readonly VITE_DATAFORSEO_PASSWORD: string
+  readonly VITE_GOOGLE_MAPS_API_KEY?: string
 }
 
 interface ImportMeta {
