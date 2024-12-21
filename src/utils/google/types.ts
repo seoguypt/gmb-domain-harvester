@@ -13,5 +13,4 @@ export interface DomainResult {
   listing: GMBListing | null;
   tld: string;
   domainAge: string;
-  domainRating?: number;
 }

@@ -17,10 +17,6 @@ export function DomainInput({
   isApiInitialized,
   onCheck,
 }: DomainInputProps) {
-  const handleCheck = async () => {
-    await onCheck();
-  };
-
   return (
     <div className="space-y-2">
       <Textarea
@@ -31,7 +27,7 @@ export function DomainInput({
         disabled={isLoading || !isApiInitialized}
       />
       <Button
-        onClick={handleCheck}
+        onClick={onCheck}
         disabled={isLoading || !isApiInitialized}
         className="w-full"
       >

@@ -9,63 +9,42 @@ export const searchGMBListing = (domain: string): Promise<GMBListing | null> => 
       return;
     }
 
+    const cleanedName = cleanBusinessName(domain);
     const cleanedDomain = cleanDomain(domain);
-    const businessName = cleanBusinessName(domain);
-    
-    console.log(`Searching for GMB listing:
-      Original domain: ${domain}
-      Cleaned domain: ${cleanedDomain}
-      Business name search: ${businessName}`);
+    console.log(`Searching for business: "${cleanedName}" (Domain: ${cleanedDomain})`);
 
-    // First try searching by the business name
     const request: google.maps.places.TextSearchRequest = {
-      query: `${businessName} funeral`,
+      query: cleanedName,
       type: 'establishment'
     };
 
     placesService.textSearch(request, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
-        // Sort results to prioritize exact matches
-        results.sort((a, b) => {
-          const aName = a.name?.toLowerCase() || '';
-          const bName = b.name?.toLowerCase() || '';
-          const nameToMatch = businessName.toLowerCase();
-          
-          // Exact matches first
-          if (aName === nameToMatch && bName !== nameToMatch) return -1;
-          if (bName === nameToMatch && aName !== nameToMatch) return 1;
-          
-          // Then partial matches
-          const aIncludes = aName.includes(nameToMatch) || nameToMatch.includes(aName);
-          const bIncludes = bName.includes(nameToMatch) || nameToMatch.includes(bName);
-          if (aIncludes && !bIncludes) return -1;
-          if (bIncludes && !aIncludes) return 1;
-          
-          return 0;
-        });
-
-        console.log(`Found ${results.length} results:`, results.map(r => r.name));
-
-        // Get details for the first (best) match
+      if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0]) {
         const placeId = results[0].place_id;
+        
         placesService.getDetails(
           {
             placeId: placeId,
-            fields: ['name', 'formatted_address', 'rating', 'website', 'types']
+            fields: ['name', 'formatted_address', 'rating', 'types', 'website']
           },
           (place, detailsStatus) => {
             if (detailsStatus === google.maps.places.PlacesServiceStatus.OK && place) {
               const placeWebsite = place.website || '';
               const businessNameLower = place.name?.toLowerCase() || '';
               
-              console.log(`Comparing details:
-                Place name: ${businessNameLower}
+              console.log(`Comparing:
+                Input domain: ${domain}
+                Cleaned domain: ${cleanedDomain}
                 Place website: ${placeWebsite}
-                Original domain: ${domain}`);
+                Place name: ${businessNameLower}
+                Cleaned name: ${cleanedName}`);
               
               const websiteMatch = placeWebsite && domainsMatch(domain, placeWebsite);
-              const nameMatch = businessNameLower.includes(businessName) || 
-                              businessName.includes(businessNameLower);
+              
+              const nameMatch = (businessNameLower.includes(cleanedName) || 
+                               cleanedName.includes(businessNameLower)) &&
+                               Math.min(businessNameLower.length, cleanedName.length) / 
+                               Math.max(businessNameLower.length, cleanedName.length) > 0.7;
               
               if (websiteMatch || nameMatch) {
                 console.log(`Match found! Type: ${websiteMatch ? 'website' : 'name'}`);
