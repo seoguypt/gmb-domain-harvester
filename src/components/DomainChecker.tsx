@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
-import { getDomainAge } from "@/utils/dataForSeo";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
@@ -18,8 +17,6 @@ export function DomainChecker() {
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
-  const [dataForSeoLogin, setDataForSeoLogin] = useState("");
-  const [dataForSeoPassword, setDataForSeoPassword] = useState("");
 
   const initializeApi = async () => {
     if (!apiKey) {
@@ -85,16 +82,12 @@ export function DomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
-          const [listing, domainAge] = await Promise.all([
-            searchGMBListing(domain),
-            getDomainAge(domain, dataForSeoLogin, dataForSeoPassword)
-          ]);
-          
+          const listing = await searchGMBListing(domain);
           newResults.push({ 
             domain,
             listing,
             tld: domain.split('.').pop() || '',
-            domainAge
+            domainAge: 'N/A'
           });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
@@ -144,10 +137,6 @@ export function DomainChecker() {
               isInitializing={isInitializing}
               onInitialize={initializeApi}
               isApiInitialized={isApiInitialized}
-              dataForSeoLogin={dataForSeoLogin}
-              setDataForSeoLogin={setDataForSeoLogin}
-              dataForSeoPassword={dataForSeoPassword}
-              setDataForSeoPassword={setDataForSeoPassword}
             />
 
             <DomainInput

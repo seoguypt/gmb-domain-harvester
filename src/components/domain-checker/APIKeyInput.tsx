@@ -8,10 +8,6 @@ interface APIKeyInputProps {
   isInitializing: boolean;
   onInitialize: () => Promise<void>;
   isApiInitialized: boolean;
-  dataForSeoLogin: string;
-  setDataForSeoLogin: (login: string) => void;
-  dataForSeoPassword: string;
-  setDataForSeoPassword: (password: string) => void;
 }
 
 export function APIKeyInput({
@@ -20,10 +16,6 @@ export function APIKeyInput({
   isInitializing,
   onInitialize,
   isApiInitialized,
-  dataForSeoLogin,
-  setDataForSeoLogin,
-  dataForSeoPassword,
-  setDataForSeoPassword,
 }: APIKeyInputProps) {
   return (
     <div className="space-y-2">
@@ -46,22 +38,6 @@ export function APIKeyInput({
             "Initialize API"
           )}
         </Button>
-      </div>
-      <div className="flex gap-2">
-        <Input
-          placeholder="DataForSEO Login"
-          value={dataForSeoLogin}
-          onChange={(e) => setDataForSeoLogin(e.target.value)}
-          className="text-lg"
-          type="text"
-        />
-        <Input
-          placeholder="DataForSEO Password"
-          value={dataForSeoPassword}
-          onChange={(e) => setDataForSeoPassword(e.target.value)}
-          className="text-lg"
-          type="password"
-        />
       </div>
     </div>
   );
