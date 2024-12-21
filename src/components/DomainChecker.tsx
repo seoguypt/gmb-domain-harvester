@@ -59,7 +59,7 @@ export function DomainChecker() {
             )}
           </div>
 
-          {results.length > 0 && <BulkResults results={results} />}
+          {results.length > 0 && <BulkResults results={results} isLoading={isLoading} />}
         </div>
       </Card>
     </div>

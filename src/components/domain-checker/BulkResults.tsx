@@ -17,11 +17,17 @@ interface BulkResultsProps {
     domain: string;
     listing: GMBListing | null;
   }[];
+  isLoading: boolean;
 }
 
-export function BulkResults({ results }: BulkResultsProps) {
+export function BulkResults({ results, isLoading }: BulkResultsProps) {
   return (
-    <div className="w-full mt-6 animate-fadeIn">
+    <div className="w-full mt-6 animate-fadeIn relative">
+      {isLoading && (
+        <div className="absolute -top-6 left-0 text-sm text-muted-foreground">
+          Loading more results...
+        </div>
+      )}
       <Table>
         <TableHeader>
           <TableRow>

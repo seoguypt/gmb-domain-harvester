@@ -51,23 +51,28 @@ export function useDomainChecker() {
       .filter(d => d);
 
     try {
-      const newResults = [];
+      let batchResults: { domain: string; listing: GMBListing | null; }[] = [];
+      let lastUpdateTime = Date.now();
+
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
           const listing = await searchGMBListing(domain);
-          newResults.push({ 
-            domain, 
-            listing
-          });
+          batchResults.push({ domain, listing });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
-          newResults.push({ domain, listing: null });
+          batchResults.push({ domain, listing: null });
         }
+        
+        const currentTime = Date.now();
+        if (currentTime - lastUpdateTime >= 10000 || i === domainList.length - 1) {
+          setResults(prev => [...prev, ...batchResults]);
+          batchResults = [];
+          lastUpdateTime = currentTime;
+        }
+        
         setProgress(((i + 1) / domainList.length) * 100);
       }
-      
-      setResults(newResults);
       toast({
         title: "Domain Check Complete",
         description: `Checked ${domainList.length} domain${domainList.length === 1 ? '' : 's'}`,
