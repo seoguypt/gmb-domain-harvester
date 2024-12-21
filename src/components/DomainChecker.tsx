@@ -1,11 +1,11 @@
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Card } from "../components/ui/card";
+import { Progress } from "../components/ui/progress";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
 import { Header } from "./domain-checker/Header";
-import { useGoogleMapsInit } from "@/hooks/useGoogleMapsInit";
-import { useDomainChecker } from "@/hooks/useDomainChecker";
+import { useGoogleMapsInit } from "../hooks/useGoogleMapsInit";
+import { useDomainChecker } from "../context/DomainCheckerContext";
 
 export function DomainChecker() {
   const {
