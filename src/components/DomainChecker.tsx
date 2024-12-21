@@ -24,9 +24,9 @@ export function DomainChecker() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [dataForSeoLogin, setDataForSeoLogin] = useState("");
-  const [dataForSeoPassword, setDataForSeoPassword] = useState("");
+  const [apiKey, setApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
+  const [dataForSeoLogin, setDataForSeoLogin] = useState("moneyfarm@gmail.com");
+  const [dataForSeoPassword, setDataForSeoPassword] = useState("f0857984f7921cba");
 
   const initializeApi = async () => {
     if (!apiKey) {
