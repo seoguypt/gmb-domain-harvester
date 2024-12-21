@@ -35,16 +35,14 @@ export function BulkResults({ results }: BulkResultsProps) {
                         className="flex items-center gap-2 text-primary cursor-pointer hover:underline"
                       >
                         <Link className="h-4 w-4" />
-                        {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) ? (
-                          <div className="flex flex-col">
-                            <span>Yes</span>
+                        <div className="flex flex-col">
+                          <span>Yes</span>
+                          {result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
                             <span className="text-xs text-muted-foreground">
                               {result.listing.websiteUrl}
                             </span>
-                          </div>
-                        ) : (
-                          'Yes'
-                        )}
+                          )}
+                        </div>
                       </a>
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
@@ -54,7 +52,7 @@ export function BulkResults({ results }: BulkResultsProps) {
                             <Building2 className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">{result.listing.businessName}</span>
                           </div>
-                          {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
+                          {result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
                             <div className="flex items-center gap-2 pl-6">
                               <span className="text-xs text-muted-foreground">
                                 Using domain: {result.listing.websiteUrl}
@@ -87,7 +85,7 @@ export function BulkResults({ results }: BulkResultsProps) {
                     }`}>
                       {result.listing.matchType === 'name' ? 'Name match' : result.listing.matchType}
                     </span>
-                    {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
+                    {result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
                       <div className="text-xs text-muted-foreground pl-1">
                         Using domain: {result.listing.websiteUrl}
                       </div>
