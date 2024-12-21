@@ -6,7 +6,7 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { Home, Search, List } from "lucide-react";
+import { Home, Search, List, Database } from "lucide-react";
 
 export function MainMenu() {
   return (
@@ -29,6 +29,12 @@ export function MainMenu() {
                 <Link to="/website-matches" className="flex items-center">
                   <List className="w-4 h-4 mr-2" />
                   Website Matches
+                </Link>
+              </MenubarItem>
+              <MenubarItem>
+                <Link to="/found-ones" className="flex items-center">
+                  <Database className="w-4 h-4 mr-2" />
+                  Found Ones
                 </Link>
               </MenubarItem>
             </MenubarContent>
