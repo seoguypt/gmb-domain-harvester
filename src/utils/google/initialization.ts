@@ -1,42 +1,35 @@
 import { Loader } from "@googlemaps/js-api-loader";
 
-let placesService: google.maps.places.PlacesService | null = null;
+declare global {
+  interface Window {
+    google: typeof google;
+    googleMapsApiKey: string;
+  }
+}
 
-export const initGoogleMapsApi = async (apiKey: string) => {
+export let placesService: google.maps.places.PlacesService | null = null;
+
+export const initGoogleMapsApi = async (apiKey: string): Promise<void> => {
   try {
-    if (!apiKey) {
-      throw new Error('Please enter a Google Maps API key');
-    }
-
-    console.log('Initializing Google Maps loader...');
+    window.googleMapsApiKey = apiKey;
+    
+    // We still need to load the Maps JavaScript API for the PlaceId links to work
     const loader = new Loader({
-      apiKey: apiKey,
+      apiKey,
       version: "weekly",
       libraries: ["places"]
     });
 
-    console.log('Loading Google Maps API...');
     await loader.load();
     
-    const dummyDiv = document.createElement('div');
-    const map = new google.maps.Map(dummyDiv, {
-      center: { lat: 0, lng: 0 },
-      zoom: 1
-    });
-    
-    console.log('Initializing Places service...');
+    // Create a dummy map (needed for PlaceId links)
+    const mapDiv = document.createElement('div');
+    const map = new google.maps.Map(mapDiv);
     placesService = new google.maps.places.PlacesService(map);
-    
-    if (!placesService) {
-      throw new Error('Failed to initialize Places service');
-    }
-    
+
     console.log('Google Maps API initialized successfully');
-    return placesService;
   } catch (error) {
     console.error('Error initializing Google Maps API:', error);
     throw error;
   }
 };
-
-export { placesService };
