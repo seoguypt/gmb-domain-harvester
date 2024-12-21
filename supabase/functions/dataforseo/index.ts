@@ -43,8 +43,8 @@ serve(async (req) => {
     
     console.log('Making request to DataForSEO API for domain:', domain);
     
-    // Use the domain analytics endpoint
-    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/domain/info/live', {
+    // Use the domain analytics whois overview endpoint
+    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/whois/overview/live', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
@@ -52,7 +52,7 @@ serve(async (req) => {
       },
       body: JSON.stringify([{
         target: domain,
-        include_subdomains: true
+        limit: 1
       }])
     });
 
@@ -92,10 +92,10 @@ serve(async (req) => {
 
     // Map API response fields to our expected metrics
     const metrics = {
-      domain_rating: result.backlinks_info?.domain_rank || null,
-      semrush_rank: result.semrush_info?.rank || null,
-      facebook_shares: result.social_metrics_info?.facebook?.shares_count || null,
-      ahrefs_rank: result.backlinks_info?.backlinks_rank || null
+      domain_rating: result.metrics?.domain_rank || null,
+      semrush_rank: result.metrics?.semrush_rank || null,
+      facebook_shares: result.metrics?.social?.facebook_shares || null,
+      ahrefs_rank: result.metrics?.backlinks_rank || null
     };
     
     console.log('Extracted Metrics:', JSON.stringify(metrics, null, 2));
