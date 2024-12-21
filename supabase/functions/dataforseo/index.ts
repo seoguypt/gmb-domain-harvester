@@ -43,8 +43,8 @@ serve(async (req) => {
     
     console.log('Making request to DataForSEO API for domain:', domain);
     
-    // Use the domain analytics overview endpoint
-    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/domain/overview/live', {
+    // Use the backlinks overview endpoint
+    const response = await fetch('https://api.dataforseo.com/v3/backlinks/domain_pages/live', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
@@ -52,7 +52,7 @@ serve(async (req) => {
       },
       body: JSON.stringify([{
         target: domain,
-        include_subdomains: true
+        limit: 1
       }])
     });
 
@@ -95,10 +95,10 @@ serve(async (req) => {
 
     // Map API response fields to our expected metrics
     const metrics = {
-      domain_rating: result.organic?.metrics?.organic_traffic || result.organic?.metrics?.organic_keywords || 0,
-      semrush_rank: result.organic?.metrics?.organic_position || result.organic?.metrics?.organic_keywords || 0,
-      facebook_shares: result.organic?.metrics?.organic_traffic || 0,
-      ahrefs_rank: result.organic?.metrics?.organic_keywords || 0
+      domain_rating: result.backlinks_count || result.referring_domains_count || 0,
+      semrush_rank: result.rank || result.page_rank || 0,
+      facebook_shares: result.social_shares || result.referring_links_count || 0,
+      ahrefs_rank: result.referring_domains_count || result.backlinks_count || 0
     };
 
     console.log('Mapped metrics:', JSON.stringify(metrics, null, 2));
