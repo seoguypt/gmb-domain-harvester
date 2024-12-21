@@ -4,6 +4,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Link as LinkIcon, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import type { GMBListing } from "@/utils/google/types";
+
+interface DomainCheck {
+  id: string;
+  domain: string;
+  checked_at: string;
+  listing: GMBListing;
+}
 
 const WebsiteMatches = () => {
   const { data: matches, isLoading } = useQuery({
@@ -16,7 +24,7 @@ const WebsiteMatches = () => {
         .eq('listing->matchType', 'website');
       
       if (error) throw error;
-      return data;
+      return data as DomainCheck[];
     }
   });
 
