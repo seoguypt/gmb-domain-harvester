@@ -105,36 +105,54 @@ export function useDomainChecker() {
             
             if (ahrefsApiKey) {
               try {
+                console.log(`Fetching domain rating for ${domain}`);
                 const ratingResponse = await supabase.functions.invoke('get-domain-rating', {
                   body: { domain, apiKey: ahrefsApiKey }
                 });
                 
-                if (!ratingResponse.error) {
-                  domainRating = ratingResponse.data?.domain?.domain_rating;
+                if (ratingResponse.error) {
+                  console.error('Ahrefs API error:', ratingResponse.error);
+                  toast({
+                    title: "Ahrefs API Error",
+                    description: `Failed to fetch domain rating: ${ratingResponse.error.message}`,
+                    variant: "destructive",
+                  });
+                } else {
+                  console.log('Ahrefs API response:', ratingResponse.data);
+                  domainRating = ratingResponse.data?.domain_rating;
                 }
               } catch (error) {
                 console.error(`Error fetching domain rating for ${domain}:`, error);
+                toast({
+                  title: "Domain Rating Error",
+                  description: `Failed to fetch domain rating for ${domain}`,
+                  variant: "destructive",
+                });
               }
             }
             
-            if (cachedCheck) {
-              await supabase
-                .from('domain_checks')
-                .update({ 
-                  listing,
-                  domain_rating: domainRating,
-                  checked_at: new Date().toISOString()
-                })
-                .eq('domain', domain);
-            } else {
-              await supabase
-                .from('domain_checks')
-                .insert({ 
-                  domain,
-                  listing,
-                  domain_rating: domainRating,
-                  checked_at: new Date().toISOString()
-                });
+            try {
+              if (cachedCheck) {
+                await supabase
+                  .from('domain_checks')
+                  .update({ 
+                    listing,
+                    domain_rating: domainRating,
+                    checked_at: new Date().toISOString()
+                  })
+                  .eq('domain', domain);
+              } else {
+                await supabase
+                  .from('domain_checks')
+                  .insert({ 
+                    domain,
+                    listing,
+                    domain_rating: domainRating,
+                    checked_at: new Date().toISOString()
+                  });
+              }
+            } catch (error) {
+              console.error(`Error updating database for ${domain}:`, error);
             }
           } catch (error) {
             console.error(`Error checking domain ${domain}:`, error);

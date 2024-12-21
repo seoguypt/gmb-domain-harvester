@@ -17,17 +17,26 @@ serve(async (req) => {
       )
     }
 
+    console.log(`Fetching domain rating for ${domain}`)
+
     const response = await fetch(
-      `https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}`,
+      `https://apiv2.ahrefs.com/?from=domain_rating&target=${encodeURIComponent(domain)}&mode=exact&output=json&token=${apiKey}`,
       {
         headers: {
           'Accept': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
         }
       }
     )
 
+    if (!response.ok) {
+      console.error(`Ahrefs API error: ${response.status} ${response.statusText}`)
+      const errorText = await response.text()
+      console.error(`Error details: ${errorText}`)
+      throw new Error(`Ahrefs API error: ${response.status} ${response.statusText}`)
+    }
+
     const data = await response.json()
+    console.log('Ahrefs API response:', data)
     
     return new Response(
       JSON.stringify(data),
