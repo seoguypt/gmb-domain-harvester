@@ -30,7 +30,7 @@ const FoundOnes = () => {
     <div className="space-y-8">
       <div className="flex items-center gap-2">
         <Database className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold">Found Ones</h1>
+        <h1 className="text-2xl font-bold">Found</h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

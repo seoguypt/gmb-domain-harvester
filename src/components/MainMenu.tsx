@@ -34,7 +34,7 @@ export function MainMenu() {
               <MenubarItem>
                 <Link to="/found-ones" className="flex items-center">
                   <Database className="w-4 h-4 mr-2" />
-                  Found Ones
+                  Found
                 </Link>
               </MenubarItem>
             </MenubarContent>
