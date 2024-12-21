@@ -1,16 +1,13 @@
 export const cleanDomain = (domain: string): string => {
-  // Remove protocol and www
   let cleaned = domain.toLowerCase()
     .replace(/^https?:\/\//i, '')
     .replace(/^www\./i, '');
   
-  // Common multi-part TLDs
   const multiPartTlds = [
     'co.uk', 'com.au', 'co.nz', 'co.jp', 'co.in', 
     'com.br', 'com.mx', 'co.za', 'com.sg', 'com.hk'
   ];
   
-  // Check for multi-part TLDs first
   for (const tld of multiPartTlds) {
     if (cleaned.endsWith(`.${tld}`)) {
       cleaned = cleaned.slice(0, -(tld.length + 1));
@@ -19,7 +16,6 @@ export const cleanDomain = (domain: string): string => {
     }
   }
   
-  // If no multi-part TLD found, remove single TLD
   return cleaned.replace(/\.[^/.]+$/, '');
 };
 
@@ -49,7 +45,7 @@ export const normalizeDomain = (url: string): string => {
     .replace(/^www\./i, '')
     .replace(/\/+$/, '')
     .split('/')[0];
-  
+    
   normalized = normalized
     .replace(/\.wordpress\.com$/, '')
     .replace(/\.wixsite\.com$/, '')

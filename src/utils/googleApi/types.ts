@@ -1,3 +1,11 @@
+type Library = "places" | "drawing" | "geometry" | "localContext" | "visualization";
+
+export interface GoogleMapsConfig {
+  apiKey: string;
+  version: string;
+  libraries: Library[];
+}
+
 export interface GMBListing {
   businessName: string;
   address: string;
@@ -6,12 +14,4 @@ export interface GMBListing {
   placeId: string;
   matchType: "website" | "name" | null;
   websiteUrl?: string;
-}
-
-type Library = 'places' | 'geometry' | 'drawing' | 'visualization';
-
-export interface GoogleMapsConfig {
-  apiKey: string;
-  libraries: Library[];
-  version: string;
 }
