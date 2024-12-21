@@ -6,7 +6,7 @@ export async function getDomainAge(domain: string, login?: string, password?: st
       return 'N/A (API credentials required)';
     }
 
-    const auth = Buffer.from(`${login}:${password}`).toString('base64');
+    const auth = btoa(`${login}:${password}`);
     
     const response = await fetch(`${BASE_URL}/domain_analytics/whois/live`, {
       method: 'POST',
@@ -16,6 +16,11 @@ export async function getDomainAge(domain: string, login?: string, password?: st
       },
       body: JSON.stringify([{ target: domain }])
     });
+
+    if (!response.ok) {
+      console.error('DataForSEO API error:', await response.text());
+      return 'N/A (API error)';
+    }
 
     const data = await response.json();
     
@@ -27,7 +32,7 @@ export async function getDomainAge(domain: string, login?: string, password?: st
       return `${ageInYears} years`;
     }
     
-    return 'N/A';
+    return 'N/A (No data)';
   } catch (error) {
     console.error('Error fetching domain age:', error);
     return 'N/A (API error)';
