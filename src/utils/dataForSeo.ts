@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 const BASE_URL = 'https://api.dataforseo.com/v3';
 
 export async function getDomainAge(domain: string) {

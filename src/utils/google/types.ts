@@ -4,6 +4,8 @@ export interface GMBListing {
   address: string;
   rating: number;
   matchType: 'website' | 'name';
+  type?: string;
+  websiteUrl?: string;
 }
 
 export interface DomainResult {

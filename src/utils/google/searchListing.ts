@@ -52,7 +52,6 @@ export const searchGMBListing = (domain: string): Promise<GMBListing | null> => 
                   businessName: place.name || "",
                   address: place.formatted_address || "",
                   rating: place.rating || 0,
-                  type: place.types?.[0] || "Local Business",
                   placeId: placeId,
                   matchType: websiteMatch ? "website" : "name",
                   websiteUrl: place.website || undefined
