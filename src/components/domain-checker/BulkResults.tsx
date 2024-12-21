@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link, Calendar, Building, Clock } from "lucide-react";
+import { Building2, MapPin, Star, Link, Calendar, Building, Clock, Globe, Users, ArrowUpRight } from 'lucide-react';
 import type { DomainResult } from "@/components/DomainChecker";
 
 interface BulkResultsProps {
@@ -9,20 +9,22 @@ interface BulkResultsProps {
 
 export function BulkResults({ results }: BulkResultsProps) {
   return (
-    <div className="w-full mt-6 animate-fadeIn">
+    <div className="w-full mt-6 animate-fadeIn overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
-            <TableHead>Domain Info</TableHead>
-            <TableHead>Match Type</TableHead>
+            <TableHead>Registration</TableHead>
+            <TableHead>Domain Metrics</TableHead>
+            <TableHead>Backlinks</TableHead>
+            <TableHead>SEO Performance</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {results.map((result, index) => (
             <TableRow key={index}>
-              <TableCell>{result.domain}</TableCell>
+              <TableCell className="font-medium">{result.domain}</TableCell>
               <TableCell>
                 {result.listing ? (
                   <HoverCard>
@@ -51,11 +53,6 @@ export function BulkResults({ results }: BulkResultsProps) {
                           <Star className="h-4 w-4 text-muted-foreground" />
                           <span>{result.listing.rating} / 5.0</span>
                         </div>
-                        <div className="inline-flex">
-                          <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-primary/10 text-primary">
-                            {result.listing.type}
-                          </span>
-                        </div>
                       </div>
                     </HoverCardContent>
                   </HoverCard>
@@ -64,55 +61,58 @@ export function BulkResults({ results }: BulkResultsProps) {
                 )}
               </TableCell>
               <TableCell>
-                <HoverCard>
-                  <HoverCardTrigger asChild>
-                    <button className="flex items-center gap-2 text-primary cursor-pointer hover:underline">
-                      <Clock className="h-4 w-4" />
-                      View Details
-                    </button>
-                  </HoverCardTrigger>
-                  <HoverCardContent className="w-80">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Age: {result.domainAge}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-muted-foreground" />
-                        <span>Registrar: {result.registrar}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>Expires: {result.expiryDate}</span>
-                      </div>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Registered: {result.domainAge || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                    <span>Registrar: {result.registrar || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span>Expires: {result.expiryDate || 'N/A'}</span>
+                  </div>
+                </div>
               </TableCell>
               <TableCell>
-                {result.listing?.matchType && (
-                  <div className="space-y-1">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      result.listing.matchType === 'website' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {result.listing.matchType === 'website' ? 'Website Match' : 'Name Match'}
-                    </span>
-                    {result.listing.matchType === 'name' && result.listing.websiteUrl && (
-                      <div className="text-xs text-muted-foreground">
-                        <a 
-                          href={result.listing.websiteUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline"
-                        >
-                          {result.listing.websiteUrl}
-                        </a>
-                      </div>
-                    )}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <span>TLD: {result.tld || 'N/A'}</span>
                   </div>
-                )}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span>Status: {result.registered ? 'Active' : 'Inactive'}</span>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="font-medium">Referring Domains:</span> {result.backlinksInfo?.referringDomains || 'N/A'}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Total Backlinks:</span> {result.backlinksInfo?.backlinks || 'N/A'}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Dofollow Links:</span> {result.backlinksInfo?.dofollow || 'N/A'}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="space-y-2">
+                  <div className="text-sm">
+                    <span className="font-medium">Organic Position 1:</span> {result.metrics?.organic?.pos_1 || 'N/A'}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Est. Traffic Value:</span> ${result.metrics?.organic?.estimated_paid_traffic_cost?.toLocaleString() || 'N/A'}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Total Keywords:</span> {result.metrics?.organic?.count?.toLocaleString() || 'N/A'}
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           ))}
