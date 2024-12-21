@@ -40,9 +40,18 @@ export function BulkResults({ results }: BulkResultsProps) {
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{result.listing.businessName}</span>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{result.listing.businessName}</span>
+                          </div>
+                          {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
+                            <div className="flex items-center gap-2 pl-6">
+                              <span className="text-xs text-muted-foreground">
+                                Using domain: {result.listing.websiteUrl}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -52,19 +61,6 @@ export function BulkResults({ results }: BulkResultsProps) {
                           <Star className="h-4 w-4 text-muted-foreground" />
                           <span>{result.listing.rating} / 5.0</span>
                         </div>
-                        {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
-                          <div className="flex items-center gap-2">
-                            <Globe className="h-4 w-4 text-muted-foreground" />
-                            <a 
-                              href={result.listing.websiteUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline"
-                            >
-                              {result.listing.websiteUrl}
-                            </a>
-                          </div>
-                        )}
                       </div>
                     </HoverCardContent>
                   </HoverCard>
@@ -79,7 +75,7 @@ export function BulkResults({ results }: BulkResultsProps) {
                       ? 'bg-[#F2FCE2] text-green-700'
                       : 'bg-[#FEF7CD] text-amber-700'
                   }`}>
-                    {result.listing.matchType}
+                    {result.listing.matchType === 'name' ? 'Name match' : result.listing.matchType}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">N/A</span>
