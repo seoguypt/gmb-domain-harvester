@@ -40,7 +40,8 @@ const handler = async (event) => {
       },
       body: JSON.stringify([{
         "target": domain,
-        "location_name": "United States"
+        "location_name": "United States",
+        "filters": ["domain", "like", domain]
       }])
     });
 
