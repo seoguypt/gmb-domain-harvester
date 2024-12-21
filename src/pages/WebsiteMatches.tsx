@@ -21,10 +21,15 @@ const WebsiteMatches = () => {
         .from('domain_checks')
         .select('*')
         .not('listing', 'is', null)
-        .filter('listing->matchType', 'eq', 'website');
+        .contains('listing', { matchType: 'website' });
       
       if (error) throw error;
-      return data as DomainCheck[];
+      
+      // Safely cast the data to ensure listing is of type GMBListing
+      return (data as any[]).map(item => ({
+        ...item,
+        listing: item.listing as GMBListing
+      })) as DomainCheck[];
     }
   });
 
