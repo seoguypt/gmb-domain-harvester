@@ -51,27 +51,39 @@ export function useDomainChecker() {
       .filter(d => d);
 
     try {
+      const BATCH_SIZE = 5; // Process 5 domains concurrently
+      const UPDATE_INTERVAL = 10000; // 10 seconds
+      let processedCount = 0;
       let batchResults: { domain: string; listing: GMBListing | null; }[] = [];
       let lastUpdateTime = Date.now();
 
-      for (let i = 0; i < domainList.length; i++) {
-        const domain = domainList[i];
-        try {
-          const listing = await searchGMBListing(domain);
-          batchResults.push({ domain, listing });
-        } catch (error) {
-          console.error(`Error checking domain ${domain}:`, error);
-          batchResults.push({ domain, listing: null });
-        }
+      // Split domains into batches
+      for (let i = 0; i < domainList.length; i += BATCH_SIZE) {
+        const batch = domainList.slice(i, i + BATCH_SIZE);
         
+        // Process batch concurrently
+        const batchPromises = batch.map(async (domain) => {
+          try {
+            const listing = await searchGMBListing(domain);
+            return { domain, listing };
+          } catch (error) {
+            console.error(`Error checking domain ${domain}:`, error);
+            return { domain, listing: null };
+          }
+        });
+
+        // Wait for current batch to complete
+        const batchResults = await Promise.all(batchPromises);
+        processedCount += batchResults.length;
+        
+        // Update results if enough time has passed or this is the last batch
         const currentTime = Date.now();
-        if (currentTime - lastUpdateTime >= 10000 || i === domainList.length - 1) {
+        if (currentTime - lastUpdateTime >= UPDATE_INTERVAL || processedCount === domainList.length) {
           setResults(prev => [...prev, ...batchResults]);
-          batchResults = [];
           lastUpdateTime = currentTime;
         }
         
-        setProgress(((i + 1) / domainList.length) * 100);
+        setProgress((processedCount / domainList.length) * 100);
       }
       toast({
         title: "Domain Check Complete",
