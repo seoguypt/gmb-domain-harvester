@@ -12,20 +12,21 @@ interface GMBListing {
   websiteUrl?: string;
 }
 
+interface DomainResult {
+  domain: string;
+  listing: GMBListing | null;
+}
+
 interface DomainCheckerContextType {
   domains: string;
   setDomains: (domains: string) => void;
   isLoading: boolean;
-  results: {
-    domain: string;
-    listing: GMBListing | null;
-  }[];
-  setResults: React.Dispatch<React.SetStateAction<{
-    domain: string;
-    listing: GMBListing | null;
-  }[]>>;
+  results: DomainResult[];
+  setResults: React.Dispatch<React.SetStateAction<DomainResult[]>>;
+  websiteMatches: DomainResult[];
   progress: number;
   checkDomains: (isApiInitialized: boolean) => Promise<void>;
+  clearWebsiteMatches: () => void;
 }
 
 const DomainCheckerContext = createContext<DomainCheckerContextType | undefined>(undefined);
@@ -33,12 +34,18 @@ const DomainCheckerContext = createContext<DomainCheckerContextType | undefined>
 export function DomainCheckerProvider({ children }: { children: React.ReactNode }) {
   const [domains, setDomains] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<{
-    domain: string;
-    listing: GMBListing | null;
-  }[]>([]);
+  const [results, setResults] = useState<DomainResult[]>([]);
+  const [websiteMatches, setWebsiteMatches] = useState<DomainResult[]>([]);
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+
+  const clearWebsiteMatches = () => {
+    setWebsiteMatches([]);
+    toast({
+      title: "Success",
+      description: "All website matches have been cleared",
+    });
+  };
 
   const checkDomains = async (isApiInitialized: boolean) => {
     if (!domains.trim()) {
@@ -72,7 +79,7 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
       const BATCH_SIZE = 5; // Process 5 domains concurrently
       const UPDATE_INTERVAL = 10000; // 10 seconds
       let processedCount = 0;
-      let batchResults: { domain: string; listing: GMBListing | null; }[] = [];
+      let batchResults: DomainResult[] = [];
       let lastUpdateTime = Date.now();
 
       // Split domains into batches
@@ -94,10 +101,17 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
         const batchResults = await Promise.all(batchPromises);
         processedCount += batchResults.length;
         
-        // Update results if enough time has passed or this is the last batch
+        // Update results and website matches
         const currentTime = Date.now();
         if (currentTime - lastUpdateTime >= UPDATE_INTERVAL || processedCount === domainList.length) {
           setResults(prev => [...prev, ...batchResults]);
+          
+          // Update website matches
+          const newWebsiteMatches = batchResults.filter(result => result.listing?.matchType === 'website');
+          if (newWebsiteMatches.length > 0) {
+            setWebsiteMatches(prev => [...prev, ...newWebsiteMatches]);
+          }
+          
           lastUpdateTime = currentTime;
         }
         
@@ -128,8 +142,10 @@ export function DomainCheckerProvider({ children }: { children: React.ReactNode 
         isLoading,
         results,
         setResults,
+        websiteMatches,
         progress,
         checkDomains,
+        clearWebsiteMatches,
       }}
     >
       {children}
