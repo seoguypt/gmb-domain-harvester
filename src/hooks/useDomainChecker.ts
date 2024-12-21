@@ -20,6 +20,25 @@ export function useDomainChecker() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
 
+  const fetchDomainAnalytics = async (domain: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('dataforseo', {
+        body: { domain }
+      });
+
+      if (error) {
+        console.error('Error fetching domain analytics:', error);
+        return null;
+      }
+
+      console.log('DataForSEO response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error calling DataForSEO function:', error);
+      return null;
+    }
+  };
+
   const checkDomains = async (isApiInitialized: boolean) => {
     if (!domains.trim()) {
       toast({
@@ -60,19 +79,29 @@ export function useDomainChecker() {
             .maybeSingle();
 
           let listing;
+          let analyticsData;
+
           if (cachedResult) {
             console.log('Cache hit for domain:', domain);
             listing = cachedResult.listing;
           } else {
             console.log('Cache miss for domain:', domain);
             listing = await searchGMBListing(domain);
-            if (listing) {
+            analyticsData = await fetchDomainAnalytics(domain);
+
+            if (listing || analyticsData) {
               await supabase
                 .from('domain_checks')
                 .insert({
                   domain: domain,
                   listing: listing,
-                  checked_at: new Date().toISOString()
+                  checked_at: new Date().toISOString(),
+                  ...(analyticsData?.tasks?.[0]?.result?.[0]?.metrics && {
+                    domain_rating: analyticsData.tasks[0].result[0].metrics.domain_rank,
+                    semrush_rank: analyticsData.tasks[0].result[0].metrics.semrush_rank,
+                    facebook_shares: analyticsData.tasks[0].result[0].metrics.facebook_shares,
+                    ahrefs_rank: analyticsData.tasks[0].result[0].metrics.ahrefs_rank
+                  })
                 });
             }
           }

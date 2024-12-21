@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link, ExternalLink } from "lucide-react";
+import { Building2, MapPin, Star, Link, ExternalLink, BarChart2 } from "lucide-react";
 
 interface GMBListing {
   businessName: string;
@@ -16,6 +16,10 @@ interface BulkResultsProps {
   results: {
     domain: string;
     listing: GMBListing | null;
+    domain_rating?: number;
+    semrush_rank?: number;
+    facebook_shares?: number;
+    ahrefs_rank?: number;
   }[];
 }
 
@@ -28,6 +32,7 @@ export function BulkResults({ results }: BulkResultsProps) {
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
             <TableHead>Match Type</TableHead>
+            <TableHead>Domain Metrics</TableHead>
             <TableHead>Check Domain</TableHead>
           </TableRow>
         </TableHeader>
@@ -98,6 +103,48 @@ export function BulkResults({ results }: BulkResultsProps) {
                       </div>
                     )}
                   </div>
+                )}
+              </TableCell>
+              <TableCell>
+                {(result.domain_rating || result.semrush_rank || result.facebook_shares || result.ahrefs_rank) ? (
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <button className="flex items-center gap-2 text-primary">
+                        <BarChart2 className="h-4 w-4" />
+                        View Metrics
+                      </button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-2">
+                        {result.domain_rating && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Domain Rating:</span>
+                            <span className="font-medium">{result.domain_rating}</span>
+                          </div>
+                        )}
+                        {result.semrush_rank && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">SEMrush Rank:</span>
+                            <span className="font-medium">{result.semrush_rank}</span>
+                          </div>
+                        )}
+                        {result.facebook_shares && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Facebook Shares:</span>
+                            <span className="font-medium">{result.facebook_shares}</span>
+                          </div>
+                        )}
+                        {result.ahrefs_rank && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Ahrefs Rank:</span>
+                            <span className="font-medium">{result.ahrefs_rank}</span>
+                          </div>
+                        )}
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                ) : (
+                  <span className="text-muted-foreground">No data</span>
                 )}
               </TableCell>
               <TableCell>
