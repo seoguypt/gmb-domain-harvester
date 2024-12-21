@@ -6,21 +6,21 @@ import { BulkResults } from "@/components/domain-checker/BulkResults";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 
-const Found = () => {
+const NameMatches = () => {
   const [results, setResults] = useState<{ domain: string; listing: any; }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFoundDomains = async () => {
+    const fetchNameMatches = async () => {
       const { data, error } = await supabase
         .from('domain_checks')
         .select('*')
         .not('listing', 'is', null)
-        .eq('listing->matchType', 'website')
+        .eq('listing->matchType', 'name')
         .order('checked_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching found domains:', error);
+        console.error('Error fetching name matches:', error);
         return;
       }
 
@@ -33,7 +33,7 @@ const Found = () => {
       setIsLoading(false);
     };
 
-    fetchFoundDomains();
+    fetchNameMatches();
   }, []);
 
   return (
@@ -50,18 +50,18 @@ const Found = () => {
           </div>
 
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight">Website Matches</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">Name Matches</h1>
             <p className="text-muted-foreground">
-              Domains with website-matched Google My Business listings
+              Domains with name-matched Google My Business listings
             </p>
           </div>
 
           {isLoading ? (
-            <p className="text-center text-muted-foreground">Loading website matches...</p>
+            <p className="text-center text-muted-foreground">Loading name matches...</p>
           ) : results.length > 0 ? (
             <BulkResults results={results} />
           ) : (
-            <p className="text-center text-muted-foreground">No website matches found yet.</p>
+            <p className="text-center text-muted-foreground">No name matches found yet.</p>
           )}
         </div>
       </Card>
@@ -69,4 +69,4 @@ const Found = () => {
   );
 };
 
-export default Found;
+export default NameMatches;
