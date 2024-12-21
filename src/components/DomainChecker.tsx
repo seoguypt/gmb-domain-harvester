@@ -21,8 +21,8 @@ export function DomainChecker() {
     checkDomains,
   } = useDomainChecker();
 
-  const handleCheck = () => {
-    checkDomains(domains, ahrefsApiKey);
+  const handleCheck = async () => {
+    await checkDomains(domains, ahrefsApiKey);
   };
 
   return (
