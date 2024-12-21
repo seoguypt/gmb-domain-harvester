@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
@@ -20,6 +21,7 @@ export function DomainChecker() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [results, setResults] = useState<{ domain: string; listing: GMBListing | null; }[]>([]);
+  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("");
@@ -76,6 +78,7 @@ export function DomainChecker() {
 
     setIsLoading(true);
     setResults([]);
+    setProgress(0);
 
     const domainList = domains
       .split("\n")
@@ -84,7 +87,8 @@ export function DomainChecker() {
 
     try {
       const newResults = [];
-      for (const domain of domainList) {
+      for (let i = 0; i < domainList.length; i++) {
+        const domain = domainList[i];
         try {
           const listing = await searchGMBListing(domain);
           newResults.push({ domain, listing });
@@ -92,6 +96,8 @@ export function DomainChecker() {
           console.error(`Error checking domain ${domain}:`, error);
           newResults.push({ domain, listing: null });
         }
+        // Update progress after each domain check
+        setProgress(((i + 1) / domainList.length) * 100);
       }
       
       setResults(newResults);
@@ -108,6 +114,7 @@ export function DomainChecker() {
       });
     } finally {
       setIsLoading(false);
+      setProgress(0);
     }
   };
 
@@ -138,6 +145,15 @@ export function DomainChecker() {
               isApiInitialized={isApiInitialized}
               onCheck={checkDomains}
             />
+
+            {isLoading && (
+              <div className="space-y-2">
+                <Progress value={progress} className="w-full" />
+                <p className="text-sm text-center text-muted-foreground">
+                  Checking domains... {Math.round(progress)}%
+                </p>
+              </div>
+            )}
           </div>
 
           {results.length > 0 && <BulkResults results={results} />}
