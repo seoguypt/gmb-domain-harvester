@@ -54,10 +54,10 @@ export function useDomainChecker() {
         const hasMetrics = Object.values(metrics).some(value => value !== null);
         if (hasMetrics) {
           return {
-            domain_rating: metrics.domain_rating || null,
-            semrush_rank: metrics.semrush_rank || null,
-            facebook_shares: metrics.facebook_shares || null,
-            ahrefs_rank: metrics.ahrefs_rank || null
+            domain_rating: metrics.domain_rating || metrics.metrics?.domain_rank || null,
+            semrush_rank: metrics.semrush_rank || metrics.metrics?.semrush_rank || null,
+            facebook_shares: metrics.facebook_shares || metrics.metrics?.social?.facebook_shares || null,
+            ahrefs_rank: metrics.ahrefs_rank || metrics.metrics?.backlinks_rank || null
           };
         }
       }
