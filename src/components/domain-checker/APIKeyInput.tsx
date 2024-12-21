@@ -21,25 +21,40 @@ export function APIKeyInput({
   const { toast } = useToast();
 
   return (
-    <div className="flex gap-2">
-      <Input
-        placeholder="Enter Google Maps API Key"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-        className="text-lg"
-        type="password"
-      />
-      <Button
-        onClick={onInitialize}
-        disabled={isInitializing || !apiKey}
-        className="min-w-[100px]"
-      >
-        {isInitializing ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          "Initialize API"
-        )}
-      </Button>
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Input
+          placeholder="Enter Google Maps API Key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="text-lg"
+          type="password"
+        />
+        <Button
+          onClick={onInitialize}
+          disabled={isInitializing || !apiKey}
+          className="min-w-[100px]"
+        >
+          {isInitializing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Initialize API"
+          )}
+        </Button>
+      </div>
+      
+      <div className="flex gap-2">
+        <Input
+          placeholder="DataForSEO Login"
+          className="text-lg"
+          type="text"
+        />
+        <Input
+          placeholder="DataForSEO Password"
+          className="text-lg"
+          type="password"
+        />
+      </div>
     </div>
   );
 }

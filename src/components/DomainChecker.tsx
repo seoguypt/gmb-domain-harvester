@@ -17,6 +17,8 @@ export function DomainChecker() {
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [dataForSeoLogin, setDataForSeoLogin] = useState("");
+  const [dataForSeoPassword, setDataForSeoPassword] = useState("");
 
   const initializeApi = async () => {
     if (!apiKey) {
