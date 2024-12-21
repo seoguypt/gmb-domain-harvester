@@ -46,11 +46,28 @@ export const initGoogleMapsApi = async (apiKey: string) => {
 };
 
 const cleanDomain = (domain: string): string => {
-  return domain.toLowerCase()
+  // Remove protocol and www
+  let cleaned = domain.toLowerCase()
     .replace(/^https?:\/\//i, '')
-    .replace(/^www\./i, '')
-    .replace(/\/+$/, '')  // Remove trailing slashes
-    .replace(/\.[^/.]+$/, '');
+    .replace(/^www\./i, '');
+  
+  // Common multi-part TLDs
+  const multiPartTlds = [
+    'co.uk', 'com.au', 'co.nz', 'co.jp', 'co.in', 
+    'com.br', 'com.mx', 'co.za', 'com.sg', 'com.hk'
+  ];
+  
+  // Check for multi-part TLDs first
+  for (const tld of multiPartTlds) {
+    if (cleaned.endsWith(`.${tld}`)) {
+      cleaned = cleaned.slice(0, -(tld.length + 1)); // +1 for the dot
+      console.log(`Found multi-part TLD: .${tld}, cleaned domain: ${cleaned}`);
+      return cleaned;
+    }
+  }
+  
+  // If no multi-part TLD found, remove single TLD
+  return cleaned.replace(/\.[^/.]+$/, '');
 };
 
 const cleanBusinessName = (domain: string): string => {
@@ -94,7 +111,7 @@ export const searchGMBListing = (domain: string): Promise<{
   type: string;
   placeId: string;
   matchType: "website" | "name" | null;
-  websiteUrl?: string; // Add this field to store the business's actual website
+  websiteUrl?: string;
 } | null> => {
   return new Promise((resolve, reject) => {
     if (!placesService) {
