@@ -11,6 +11,7 @@ let placesService: google.maps.places.PlacesService | null = null;
 
 export const initGoogleMapsApi = async () => {
   try {
+    console.log('Fetching Google Maps API key from Supabase...');
     const { data, error } = await supabase
       .from('secrets')
       .select('value')
@@ -19,19 +20,22 @@ export const initGoogleMapsApi = async () => {
 
     if (error) {
       console.error('Error fetching API key:', error);
-      throw error;
+      throw new Error('Failed to fetch Google Maps API key');
     }
-    if (!data) {
-      console.error('Google Maps API key not found in secrets');
+    
+    if (!data?.value) {
+      console.error('Google Maps API key not found or empty');
       throw new Error('Google Maps API key not found');
     }
 
+    console.log('Initializing Google Maps loader...');
     const loader = new Loader({
       apiKey: data.value,
       version: "weekly",
       libraries: ["places"]
     });
 
+    console.log('Loading Google Maps API...');
     await loader.load();
     
     // Create a dummy map (required for PlacesService)
@@ -41,8 +45,14 @@ export const initGoogleMapsApi = async () => {
       zoom: 1
     });
     
+    console.log('Initializing Places service...');
     placesService = new google.maps.places.PlacesService(map);
     
+    if (!placesService) {
+      throw new Error('Failed to initialize Places service');
+    }
+    
+    console.log('Google Maps API initialized successfully');
     return true;
   } catch (error) {
     console.error('Error initializing Google Maps API:', error);
