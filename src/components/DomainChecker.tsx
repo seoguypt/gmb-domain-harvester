@@ -6,10 +6,8 @@ import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
 import { APIKeyInput } from "./domain-checker/APIKeyInput";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
+import { Header } from "./domain-checker/Header";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
-import { Button } from "./ui/button";
-import { Trash2 } from "lucide-react";
 
 interface GMBListing {
   businessName: string;
@@ -30,7 +28,6 @@ export function DomainChecker() {
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const [apiKey, setApiKey] = useState("");
-  const [isClearing, setIsClearing] = useState(false);
 
   const initializeApi = async () => {
     if (!apiKey) {
@@ -60,33 +57,6 @@ export function DomainChecker() {
       setIsApiInitialized(false);
     } finally {
       setIsInitializing(false);
-    }
-  };
-
-  const clearCache = async () => {
-    setIsClearing(true);
-    try {
-      const { error } = await supabase
-        .from('domain_checks')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
-
-      if (error) throw error;
-
-      setResults([]);
-      toast({
-        title: "Cache Cleared",
-        description: "All cached domain checks have been cleared",
-      });
-    } catch (error) {
-      console.error("Error clearing cache:", error);
-      toast({
-        title: "Error",
-        description: "Failed to clear cache",
-        variant: "destructive",
-      });
-    } finally {
-      setIsClearing(false);
     }
   };
 
@@ -123,12 +93,11 @@ export function DomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
-          // Check cache first
           const { data: cachedResult } = await supabase
             .from('domain_checks')
             .select('listing')
             .eq('domain', domain)
-            .maybeSingle();  // Changed from .single() to .maybeSingle()
+            .maybeSingle();
 
           let listing;
           if (cachedResult) {
@@ -137,8 +106,7 @@ export function DomainChecker() {
           } else {
             console.log('Cache miss for domain:', domain);
             listing = await searchGMBListing(domain);
-            // Store in cache
-            if (listing) {  // Only store if we found a listing
+            if (listing) {
               await supabase
                 .from('domain_checks')
                 .insert({
@@ -179,28 +147,7 @@ export function DomainChecker() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
       <Card className="w-full max-w-2xl p-8 glass-card animate-fadeIn">
         <div className="space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight">Domain Checker</h1>
-            <p className="text-muted-foreground">
-              Check if domains have active Google My Business listings
-            </p>
-            <div className="flex justify-center gap-2 mt-2">
-              <Link to="/found">
-                <Button variant="outline">
-                  View Found Domains
-                </Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                onClick={clearCache}
-                disabled={isClearing}
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                {isClearing ? "Clearing..." : "Clear Cache"}
-              </Button>
-            </div>
-          </div>
+          <Header onClearComplete={() => setResults([])} />
 
           <div className="space-y-4">
             <APIKeyInput
