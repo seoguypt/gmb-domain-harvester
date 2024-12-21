@@ -38,13 +38,10 @@ const handler = async (event) => {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        "id": "string",
-        "tasks": [{
-          "target": domain,
-          "location_name": "United States"
-        }]
-      })
+      body: JSON.stringify([{
+        "target": domain,
+        "location_name": "United States"
+      }])
     });
 
     console.log('DataForSEO response status:', response.status);
