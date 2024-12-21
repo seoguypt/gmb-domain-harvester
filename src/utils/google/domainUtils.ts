@@ -48,16 +48,6 @@ export const domainsMatch = (domain1: string, domain2: string): boolean => {
   const norm1 = normalizeDomain(domain1);
   const norm2 = normalizeDomain(domain2);
   
-  // Direct match
-  if (norm1 === norm2) return true;
-  
-  // Match with www
-  if (`www.${norm1}` === norm2 || norm1 === `www.${norm2}`) return true;
-  
-  // Handle .co.uk domains
-  const uk1 = norm1.replace(/\.co\.uk$/, '');
-  const uk2 = norm2.replace(/\.co\.uk$/, '');
-  if (uk1 === uk2) return true;
-  
-  return false;
+  // Only return true for exact matches after normalization
+  return norm1 === norm2;
 };
