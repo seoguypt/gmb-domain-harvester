@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchDomainRating } from "@/utils/api/domainRating";
+import { getCachedDomainCheck, updateDomainCache } from "@/utils/cache/domainCache";
 import type { DomainResult } from "@/utils/google/types";
 
 export function useDomainChecker() {
@@ -43,39 +44,6 @@ export function useDomainChecker() {
     }
   };
 
-  const getDomainRating = async (domain: string, apiKey: string) => {
-    try {
-      console.log(`Fetching domain rating for ${domain}`);
-      const response = await fetch(
-        `https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}`,
-        {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Ahrefs API error:', errorText);
-        throw new Error(`Ahrefs API error: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('Ahrefs API response:', data);
-      return data?.domain_rating;
-    } catch (error) {
-      console.error(`Error fetching domain rating for ${domain}:`, error);
-      toast({
-        title: "Domain Rating Error",
-        description: `Failed to fetch domain rating for ${domain}`,
-        variant: "destructive",
-      });
-      return null;
-    }
-  };
-
   const checkDomains = async (domains: string, ahrefsApiKey: string) => {
     if (!domains.trim()) {
       toast({
@@ -109,19 +77,7 @@ export function useDomainChecker() {
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         
-        let cachedCheck = null;
-        try {
-          const { data } = await supabase
-            .from('domain_checks')
-            .select('*')
-            .eq('domain', domain)
-            .maybeSingle();
-          
-          cachedCheck = data;
-        } catch (error) {
-          console.error(`Error fetching cached result for ${domain}:`, error);
-        }
-
+        const cachedCheck = await getCachedDomainCheck(domain);
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -137,32 +93,18 @@ export function useDomainChecker() {
             listing = await searchGMBListing(domain);
             
             if (ahrefsApiKey) {
-              domainRating = await getDomainRating(domain, ahrefsApiKey);
+              try {
+                domainRating = await fetchDomainRating(domain, ahrefsApiKey);
+              } catch (error) {
+                toast({
+                  title: "Domain Rating Error",
+                  description: `Failed to fetch domain rating for ${domain}`,
+                  variant: "destructive",
+                });
+              }
             }
             
-            try {
-              if (cachedCheck) {
-                await supabase
-                  .from('domain_checks')
-                  .update({ 
-                    listing,
-                    domain_rating: domainRating,
-                    checked_at: new Date().toISOString()
-                  })
-                  .eq('domain', domain);
-              } else {
-                await supabase
-                  .from('domain_checks')
-                  .insert({ 
-                    domain,
-                    listing,
-                    domain_rating: domainRating,
-                    checked_at: new Date().toISOString()
-                  });
-              }
-            } catch (error) {
-              console.error(`Error updating database for ${domain}:`, error);
-            }
+            await updateDomainCache(domain, { listing, domainRating });
           } catch (error) {
             console.error(`Error checking domain ${domain}:`, error);
           }
