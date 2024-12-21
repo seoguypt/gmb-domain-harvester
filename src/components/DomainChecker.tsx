@@ -24,6 +24,10 @@ export function DomainChecker() {
     await checkDomains(domains);
   };
 
+  const handleClear = () => {
+    setDomains("");
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
       <Card className="w-full max-w-2xl p-8 glass-card animate-fadeIn">
@@ -50,6 +54,7 @@ export function DomainChecker() {
               isLoading={isLoading}
               isApiInitialized={isApiInitialized}
               onCheck={handleCheck}
+              onClear={handleClear}
             />
 
             <ProgressIndicator isLoading={isLoading} progress={progress} />
