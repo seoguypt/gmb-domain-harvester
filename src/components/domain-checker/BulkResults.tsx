@@ -106,7 +106,10 @@ export function BulkResults({ results }: BulkResultsProps) {
                 )}
               </TableCell>
               <TableCell>
-                {(result.domain_rating || result.semrush_rank || result.facebook_shares || result.ahrefs_rank) ? (
+                {(typeof result.domain_rating !== 'undefined' || 
+                  typeof result.semrush_rank !== 'undefined' || 
+                  typeof result.facebook_shares !== 'undefined' || 
+                  typeof result.ahrefs_rank !== 'undefined') ? (
                   <HoverCard>
                     <HoverCardTrigger asChild>
                       <button className="flex items-center gap-2 text-primary">
@@ -116,25 +119,25 @@ export function BulkResults({ results }: BulkResultsProps) {
                     </HoverCardTrigger>
                     <HoverCardContent className="w-80">
                       <div className="space-y-2">
-                        {result.domain_rating && (
+                        {typeof result.domain_rating !== 'undefined' && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Domain Rating:</span>
                             <span className="font-medium">{result.domain_rating}</span>
                           </div>
                         )}
-                        {result.semrush_rank && (
+                        {typeof result.semrush_rank !== 'undefined' && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">SEMrush Rank:</span>
                             <span className="font-medium">{result.semrush_rank}</span>
                           </div>
                         )}
-                        {result.facebook_shares && (
+                        {typeof result.facebook_shares !== 'undefined' && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Facebook Shares:</span>
                             <span className="font-medium">{result.facebook_shares}</span>
                           </div>
                         )}
-                        {result.ahrefs_rank && (
+                        {typeof result.ahrefs_rank !== 'undefined' && (
                           <div className="flex justify-between">
                             <span className="text-sm text-muted-foreground">Ahrefs Rank:</span>
                             <span className="font-medium">{result.ahrefs_rank}</span>
