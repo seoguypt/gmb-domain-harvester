@@ -16,35 +16,42 @@ interface GMBListing {
 export function DomainChecker() {
   const [domain, setDomain] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [listing, setListing] = useState<GMBListing | null>(null);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
-  const [additionalField, setAdditionalField] = useState("");
+  const [apiKey, setApiKey] = useState("");
 
-  useEffect(() => {
-    const init = async () => {
-      setIsInitializing(true);
-      try {
-        await initGoogleMapsApi();
-        setIsApiInitialized(true);
-        toast({
-          title: "API Initialized",
-          description: "Google Maps API is ready to use",
-        });
-      } catch (error) {
-        console.error("Failed to initialize Google Maps API:", error);
-        toast({
-          title: "API Initialization Error",
-          description: "Failed to initialize Google Maps API. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-    init();
-  }, [toast]);
+  const initializeApi = async () => {
+    if (!apiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your Google Maps API key",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsInitializing(true);
+    try {
+      await initGoogleMapsApi(apiKey);
+      setIsApiInitialized(true);
+      toast({
+        title: "API Initialized",
+        description: "Google Maps API is ready to use",
+      });
+    } catch (error) {
+      console.error("Failed to initialize Google Maps API:", error);
+      toast({
+        title: "API Initialization Error",
+        description: error instanceof Error ? error.message : "Failed to initialize Google Maps API",
+        variant: "destructive",
+      });
+      setIsApiInitialized(false);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
 
   const checkDomain = async () => {
     if (!domain) {
@@ -59,7 +66,7 @@ export function DomainChecker() {
     if (!isApiInitialized) {
       toast({
         title: "API Not Ready",
-        description: "Please wait for the API to initialize",
+        description: "Please enter your API key and initialize the API first",
         variant: "destructive",
       });
       return;
@@ -106,12 +113,26 @@ export function DomainChecker() {
           </div>
 
           <div className="space-y-4">
-            <Input
-              placeholder="Additional field"
-              value={additionalField}
-              onChange={(e) => setAdditionalField(e.target.value)}
-              className="text-lg"
-            />
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter Google Maps API Key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="text-lg"
+                type="password"
+              />
+              <Button
+                onClick={initializeApi}
+                disabled={isInitializing || !apiKey}
+                className="min-w-[100px]"
+              >
+                {isInitializing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Initialize API"
+                )}
+              </Button>
+            </div>
 
             <div className="flex gap-2">
               <Input
@@ -119,17 +140,15 @@ export function DomainChecker() {
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
                 className="text-lg"
-                disabled={isLoading || isInitializing}
+                disabled={isLoading || !isApiInitialized}
               />
               <Button
                 onClick={checkDomain}
-                disabled={isLoading || isInitializing}
+                disabled={isLoading || !isApiInitialized}
                 className="min-w-[100px]"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isInitializing ? (
-                  "Initializing..."
                 ) : (
                   "Check"
                 )}

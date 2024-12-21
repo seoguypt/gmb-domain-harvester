@@ -1,5 +1,4 @@
 import { Loader } from "@googlemaps/js-api-loader";
-import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -9,28 +8,15 @@ declare global {
 
 let placesService: google.maps.places.PlacesService | null = null;
 
-export const initGoogleMapsApi = async () => {
+export const initGoogleMapsApi = async (apiKey: string) => {
   try {
-    console.log('Fetching Google Maps API key from Supabase...');
-    const { data, error } = await supabase
-      .from('secrets')
-      .select('value')
-      .eq('name', 'GOOGLE_MAPS_API_KEY')
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error fetching API key:', error);
-      throw new Error('Failed to fetch Google Maps API key');
-    }
-    
-    if (!data?.value) {
-      console.error('Google Maps API key not found or empty');
-      throw new Error('Google Maps API key not found');
+    if (!apiKey) {
+      throw new Error('Please enter a Google Maps API key');
     }
 
     console.log('Initializing Google Maps loader...');
     const loader = new Loader({
-      apiKey: data.value,
+      apiKey: apiKey,
       version: "weekly",
       libraries: ["places"]
     });
