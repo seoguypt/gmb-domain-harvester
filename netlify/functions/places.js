@@ -1,36 +1,13 @@
-const fetch = require('node-fetch');
+let fetch;
 
-const PLACES_API_BASE_URL = 'https://places.googleapis.com/v1/places';
-
-// Helper function to compare domains
-const domainsMatch = (domain1, domain2) => {
-  try {
-    const normalize = (url) => {
-      // Remove protocol and www
-      let normalized = url.toLowerCase()
-        .replace(/^https?:\/\//, '')
-        .replace(/^www\./, '');
-      // Remove trailing slash and path
-      normalized = normalized.split('/')[0];
-      return normalized;
-    };
-    
-    return normalize(domain1) === normalize(domain2);
-  } catch (error) {
-    console.error('Error comparing domains:', error);
-    return false;
+export const handler = async (event) => {
+  // Dynamic import for node-fetch
+  if (!fetch) {
+    fetch = (await import('node-fetch')).default;
   }
-};
 
-// Clean business name for comparison
-const cleanBusinessName = (name) => {
-  return name.toLowerCase()
-    .replace(/^www\./, '')
-    .replace(/\.(com|net|org|io|co|uk|us)$/, '')
-    .replace(/[^a-z0-9]/g, '');
-};
+  const PLACES_API_BASE_URL = 'https://places.googleapis.com/v1/places';
 
-exports.handler = async (event) => {
   try {
     const { domain, query } = JSON.parse(event.body);
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -49,8 +26,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         textQuery: query,
-        languageCode: "en",
-        maxResultCount: 10 // Get more results to find better matches
+        languageCode: "en"
       })
     });
 
@@ -67,49 +43,66 @@ exports.handler = async (event) => {
       };
     }
 
-    // Try to find the best match from all results
-    const place = searchData.places.find(p => {
-      // First try to find an exact website match
-      if (p.websiteUri && domainsMatch(domain, p.websiteUri)) {
-        return true;
+    // Get the first result
+    const place = searchData.places[0];
+    
+    // Helper function to compare domains
+    const domainsMatch = (domain1, domain2) => {
+      try {
+        const normalize = (url) => {
+          // Remove protocol and www
+          let normalized = url.toLowerCase()
+            .replace(/^https?:\/\//, '')
+            .replace(/^www\./, '');
+          // Remove trailing slash and path
+          normalized = normalized.split('/')[0];
+          return normalized;
+        };
+        
+        return normalize(domain1) === normalize(domain2);
+      } catch (error) {
+        console.error('Error comparing domains:', error);
+        return false;
       }
+    };
 
-      // Then try to find a good name match
-      const cleanedPlaceName = cleanBusinessName(p.displayName.text);
-      const cleanedSearchName = cleanBusinessName(domain);
-      const similarity = Math.min(cleanedPlaceName.length, cleanedSearchName.length) / 
-                        Math.max(cleanedPlaceName.length, cleanedSearchName.length);
-      
-      return (cleanedPlaceName.includes(cleanedSearchName) || 
-              cleanedSearchName.includes(cleanedPlaceName)) &&
-             similarity > 0.7;
-    });
+    // Clean business name for comparison
+    const cleanBusinessName = (name) => {
+      return name.toLowerCase()
+        .replace(/^www\./, '')
+        .replace(/\.(com|net|org|io|co|uk|us)$/, '')
+        .replace(/[^a-z0-9]/g, '');
+    };
 
-    // If no good match found, return null
-    if (!place) {
+    const cleanedSearchName = cleanBusinessName(domain);
+    const cleanedPlaceName = cleanBusinessName(place.displayName.text);
+    const websiteMatch = place.websiteUri && domainsMatch(domain, place.websiteUri);
+    const nameMatch = !websiteMatch && 
+                     (cleanedPlaceName.includes(cleanedSearchName) || 
+                      cleanedSearchName.includes(cleanedPlaceName)) &&
+                     Math.min(cleanedPlaceName.length, cleanedSearchName.length) / 
+                     Math.max(cleanedPlaceName.length, cleanedSearchName.length) > 0.7;
+
+    if (websiteMatch || nameMatch) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ result: null })
+        body: JSON.stringify({
+          result: {
+            businessName: place.displayName.text,
+            address: place.formattedAddress,
+            rating: place.rating || 0,
+            type: place.primaryTypeDisplayName || "Local Business",
+            placeId: place.id,
+            matchType: websiteMatch ? "website" : "name",
+            websiteUrl: place.websiteUri
+          }
+        })
       };
     }
 
-    // Determine match type
-    const websiteMatch = place.websiteUri && domainsMatch(domain, place.websiteUri);
-    const matchType = websiteMatch ? "website" : "name";
-
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        result: {
-          businessName: place.displayName.text,
-          address: place.formattedAddress,
-          rating: place.rating || 0,
-          type: place.primaryTypeDisplayName || "Local Business",
-          placeId: place.id,
-          matchType,
-          websiteUrl: place.websiteUri
-        }
-      })
+      body: JSON.stringify({ result: null })
     };
 
   } catch (error) {
