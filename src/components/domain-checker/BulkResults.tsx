@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link } from "lucide-react";
+import { Building2, MapPin, Star, Link, ExternalLink } from "lucide-react";
 
 interface GMBListing {
   businessName: string;
@@ -28,6 +28,7 @@ export function BulkResults({ results }: BulkResultsProps) {
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
             <TableHead>Match Type</TableHead>
+            <TableHead>Check Domain</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -98,6 +99,29 @@ export function BulkResults({ results }: BulkResultsProps) {
                     )}
                   </div>
                 )}
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`https://majestic.com/reports/site-explorer?q=${result.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Majestic
+                  </a>
+                  <span className="text-muted-foreground">|</span>
+                  <a
+                    href={`https://app.ahrefs.com/v2-site-explorer/overview?mode=subdomains&target=${result.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Ahrefs
+                  </a>
+                </div>
               </TableCell>
             </TableRow>
           ))}
