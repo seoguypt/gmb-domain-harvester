@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import { APIKeyInput } from "./APIKeyInput";
 
 interface APIKeysProps {
   googleApiKey: string;
@@ -20,20 +20,26 @@ export function APIKeys({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <APIKeyInput 
-          value={googleApiKey}
-          onChange={setGoogleApiKey}
-        />
-        <Button
-          onClick={onInitialize}
-          disabled={isInitializing || !googleApiKey}
-          className="w-full"
-        >
-          {isInitializing ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : null}
-          {isApiInitialized ? "API Ready" : "Initialize API"}
-        </Button>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Enter Google Maps API Key"
+            value={googleApiKey}
+            onChange={(e) => setGoogleApiKey(e.target.value)}
+            className="text-lg"
+            type="password"
+          />
+          <Button
+            onClick={onInitialize}
+            disabled={isInitializing || !googleApiKey}
+            className="min-w-[100px]"
+          >
+            {isInitializing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Initialize API"
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

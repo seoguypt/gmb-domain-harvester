@@ -1,37 +1,41 @@
 export const cleanDomain = (domain: string): string => {
-  // Remove protocol and www if present
-  let cleaned = domain.replace(/^(https?:\/\/)?(www\.)?/, '');
-  
-  // Remove trailing slashes and spaces
-  cleaned = cleaned.replace(/\/+$/, '').trim();
-  
-  // For UK domains, keep the .co.uk part but remove it for the business name
-  if (cleaned.endsWith('.co.uk')) {
-    return cleaned;
-  }
-  
-  // For other domains, remove TLD
-  return cleaned.split('.')[0];
+  return domain.toLowerCase()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .replace(/\/+$/, '')
+    .replace(/\.[^/.]+$/, '');
 };
 
 export const cleanBusinessName = (domain: string): string => {
-  // Remove protocol and www if present
-  let cleaned = domain.replace(/^(https?:\/\/)?(www\.)?/, '');
+  let name = cleanDomain(domain);
   
-  // Remove trailing slashes and spaces
-  cleaned = cleaned.replace(/\/+$/, '').trim();
+  const suffixes = [
+    "ltd", "limited", "inc", "incorporated", "llc", "corp", "corporation",
+    "co", "company", "services", "solutions", "group", "holdings", "enterprises"
+  ];
   
-  // For UK domains, remove .co.uk
-  cleaned = cleaned.replace(/\.co\.uk$/, '');
+  suffixes.forEach(suffix => {
+    const suffixPattern = new RegExp(`[-_]?${suffix}$`);
+    name = name.replace(suffixPattern, '');
+  });
   
-  // Remove other TLDs
-  cleaned = cleaned.split('.')[0];
+  name = name.replace(/[-_]/g, ' ');
   
-  return cleaned;
+  return name.trim();
+};
+
+export const normalizeDomain = (url: string): string => {
+  return url.toLowerCase()
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/+$/, '')
+    .split('/')[0];
 };
 
 export const domainsMatch = (domain1: string, domain2: string): boolean => {
-  const clean1 = cleanDomain(domain1).toLowerCase();
-  const clean2 = cleanDomain(domain2).toLowerCase();
-  return clean1 === clean2;
+  const norm1 = normalizeDomain(domain1);
+  const norm2 = normalizeDomain(domain2);
+  
+  return norm1 === norm2 || 
+         `www.${norm1}` === norm2 || 
+         norm1 === `www.${norm2}`;
 };

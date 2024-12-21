@@ -1,34 +1,44 @@
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ExternalLink } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface APIKeyInputProps {
-  value: string;
-  onChange: (value: string) => void;
+  apiKey: string;
+  setApiKey: (key: string) => void;
+  isInitializing: boolean;
+  onInitialize: () => Promise<void>;
+  isApiInitialized: boolean;
 }
 
-export function APIKeyInput({ value, onChange }: APIKeyInputProps) {
+export function APIKeyInput({
+  apiKey,
+  setApiKey,
+  isInitializing,
+  onInitialize,
+  isApiInitialized,
+}: APIKeyInputProps) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label htmlFor="apiKey">Google Maps API Key</Label>
-        <a
-          href="https://console.cloud.google.com/apis/dashboard"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-primary hover:underline flex items-center gap-1"
+      <div className="flex gap-2">
+        <Input
+          placeholder="Enter Google Maps API Key"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="text-lg"
+          type="password"
+        />
+        <Button
+          onClick={onInitialize}
+          disabled={isInitializing || !apiKey}
+          className="min-w-[100px]"
         >
-          <ExternalLink className="h-3 w-3" />
-          Check API Usage
-        </a>
+          {isInitializing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Initialize API"
+          )}
+        </Button>
       </div>
-      <Input
-        type="password"
-        id="apiKey"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Enter your Google Maps API key"
-      />
     </div>
   );
 }

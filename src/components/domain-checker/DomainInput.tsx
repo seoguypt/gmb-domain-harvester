@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-import { CostEstimation } from "./CostEstimation";
-import { useMemo } from "react";
 
 interface DomainInputProps {
   domains: string;
@@ -19,13 +17,6 @@ export function DomainInput({
   isApiInitialized,
   onCheck,
 }: DomainInputProps) {
-  const domainCount = useMemo(() => {
-    return domains
-      .split("\n")
-      .map(d => d.trim())
-      .filter(d => d).length;
-  }, [domains]);
-
   const handleCheck = async () => {
     await onCheck();
   };
@@ -39,7 +30,6 @@ export function DomainInput({
         className="min-h-[120px] text-base font-mono"
         disabled={isLoading || !isApiInitialized}
       />
-      <CostEstimation domainCount={domainCount} />
       <Button
         onClick={handleCheck}
         disabled={isLoading || !isApiInitialized}
