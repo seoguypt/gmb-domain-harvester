@@ -9,42 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      domain_checks: {
-        Row: {
-          ahrefs_rank: number | null
-          checked_at: string | null
-          domain: string
-          domain_rating: number | null
-          facebook_shares: number | null
-          id: string
-          listing: Json | null
-          processed_at: string | null
-          semrush_rank: number | null
-        }
-        Insert: {
-          ahrefs_rank?: number | null
-          checked_at?: string | null
-          domain: string
-          domain_rating?: number | null
-          facebook_shares?: number | null
-          id?: string
-          listing?: Json | null
-          processed_at?: string | null
-          semrush_rank?: number | null
-        }
-        Update: {
-          ahrefs_rank?: number | null
-          checked_at?: string | null
-          domain?: string
-          domain_rating?: number | null
-          facebook_shares?: number | null
-          id?: string
-          listing?: Json | null
-          processed_at?: string | null
-          semrush_rank?: number | null
-        }
-        Relationships: []
-      }
       secrets: {
         Row: {
           created_at: string
@@ -63,39 +27,6 @@ export type Database = {
           id?: string
           name?: string
           value?: string
-        }
-        Relationships: []
-      }
-      seo_bulk_checks: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          file_id: string
-          filename: string
-          id: string
-          processed_urls: number | null
-          status: string
-          total_urls: number | null
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          file_id: string
-          filename: string
-          id?: string
-          processed_urls?: number | null
-          status: string
-          total_urls?: number | null
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          file_id?: string
-          filename?: string
-          id?: string
-          processed_urls?: number | null
-          status?: string
-          total_urls?: number | null
         }
         Relationships: []
       }
