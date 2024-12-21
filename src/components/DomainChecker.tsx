@@ -99,7 +99,7 @@ export function DomainChecker() {
             .from('domain_checks')
             .select('listing')
             .eq('domain', domain)
-            .single();
+            .maybeSingle();  // Changed from .single() to .maybeSingle()
 
           let listing;
           if (cachedResult) {
@@ -109,13 +109,15 @@ export function DomainChecker() {
             console.log('Cache miss for domain:', domain);
             listing = await searchGMBListing(domain);
             // Store in cache
-            await supabase
-              .from('domain_checks')
-              .insert({
-                domain: domain,
-                listing: listing,
-                checked_at: new Date().toISOString()
-              });
+            if (listing) {  // Only store if we found a listing
+              await supabase
+                .from('domain_checks')
+                .insert({
+                  domain: domain,
+                  listing: listing,
+                  checked_at: new Date().toISOString()
+                });
+            }
           }
           
           newResults.push({ domain, listing });
