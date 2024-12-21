@@ -63,7 +63,13 @@ export function BulkResults({ results }: BulkResultsProps) {
               </TableCell>
               <TableCell>
                 {result.listing?.matchType ? (
-                  <span className="capitalize">{result.listing.matchType}</span>
+                  <span className={`px-2.5 py-1 rounded-full text-sm capitalize ${
+                    result.listing.matchType === 'website' 
+                      ? 'bg-[#F2FCE2] text-green-700'
+                      : 'bg-[#FEF7CD] text-amber-700'
+                  }`}>
+                    {result.listing.matchType}
+                  </span>
                 ) : (
                   <span className="text-muted-foreground">N/A</span>
                 )}
