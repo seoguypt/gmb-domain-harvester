@@ -1,41 +1,37 @@
 export const cleanDomain = (domain: string): string => {
-  return domain.toLowerCase()
-    .replace(/^https?:\/\//i, '')
-    .replace(/^www\./i, '')
-    .replace(/\/+$/, '')
-    .replace(/\.[^/.]+$/, '');
+  // Remove protocol and www if present
+  let cleaned = domain.replace(/^(https?:\/\/)?(www\.)?/, '');
+  
+  // Remove trailing slashes and spaces
+  cleaned = cleaned.replace(/\/+$/, '').trim();
+  
+  // For UK domains, keep the .co.uk part but remove it for the business name
+  if (cleaned.endsWith('.co.uk')) {
+    return cleaned;
+  }
+  
+  // For other domains, remove TLD
+  return cleaned.split('.')[0];
 };
 
 export const cleanBusinessName = (domain: string): string => {
-  let name = cleanDomain(domain);
+  // Remove protocol and www if present
+  let cleaned = domain.replace(/^(https?:\/\/)?(www\.)?/, '');
   
-  const suffixes = [
-    "ltd", "limited", "inc", "incorporated", "llc", "corp", "corporation",
-    "co", "company", "services", "solutions", "group", "holdings", "enterprises"
-  ];
+  // Remove trailing slashes and spaces
+  cleaned = cleaned.replace(/\/+$/, '').trim();
   
-  suffixes.forEach(suffix => {
-    const suffixPattern = new RegExp(`[-_]?${suffix}$`);
-    name = name.replace(suffixPattern, '');
-  });
+  // For UK domains, remove .co.uk
+  cleaned = cleaned.replace(/\.co\.uk$/, '');
   
-  name = name.replace(/[-_]/g, ' ');
+  // Remove other TLDs
+  cleaned = cleaned.split('.')[0];
   
-  return name.trim();
-};
-
-export const normalizeDomain = (url: string): string => {
-  return url.toLowerCase()
-    .replace(/^https?:\/\//i, '')
-    .replace(/\/+$/, '')
-    .split('/')[0];
+  return cleaned;
 };
 
 export const domainsMatch = (domain1: string, domain2: string): boolean => {
-  const norm1 = normalizeDomain(domain1);
-  const norm2 = normalizeDomain(domain2);
-  
-  return norm1 === norm2 || 
-         `www.${norm1}` === norm2 || 
-         norm1 === `www.${norm2}`;
+  const clean1 = cleanDomain(domain1).toLowerCase();
+  const clean2 = cleanDomain(domain2).toLowerCase();
+  return clean1 === clean2;
 };
