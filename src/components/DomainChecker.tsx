@@ -88,7 +88,7 @@ export function DomainChecker() {
           .from('domain_checks')
           .select('*')
           .eq('domain', domain)
-          .single();
+          .maybeSingle();
 
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
