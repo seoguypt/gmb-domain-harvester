@@ -5,8 +5,6 @@ export const cleanDomain = (domain: string): string => {
     .replace(/^www\./i, '')
     .replace(/\/+$/, ''); // Remove trailing slashes
   
-  // For business name search, remove TLD
-  // But keep full domain for website matching
   return cleaned;
 };
 
@@ -16,11 +14,14 @@ export const cleanBusinessName = (domain: string): string => {
     .replace(/^www\./i, '')
     .replace(/\.co\.uk$/, '') // Remove .co.uk
     .replace(/\.[^/.]+$/, '') // Remove other TLDs
-    .replace(/[-_]/g, ' '); // Replace dashes and underscores with spaces
+    .replace(/[-_]/g, ' ') // Replace dashes and underscores with spaces
+    .replace(/new/, '') // Remove 'new' prefix
+    .replace(/rest/, ''); // Remove 'rest' if present
   
   const suffixes = [
     "ltd", "limited", "inc", "incorporated", "llc", "corp", "corporation",
-    "co", "company", "services", "solutions", "group", "holdings", "enterprises"
+    "co", "company", "services", "solutions", "group", "holdings", "enterprises",
+    "funeral", "funerals", "directors", "homes"
   ];
   
   // Remove common business suffixes
