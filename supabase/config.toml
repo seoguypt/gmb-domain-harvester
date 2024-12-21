@@ -1,8 +1,5 @@
+# Project ID from the Supabase dashboard
 project_id = "dqkoklfdlqabquqqofsg"
-
-[api]
-enabled = true
-url = "https://dqkoklfdlqabquqqofsg.supabase.co"
 
 [[functions]]
 name = "dataforseo"
