@@ -51,19 +51,24 @@ export function useDomainChecker() {
       .filter(d => d);
 
     try {
-      // Process one domain at a time
+      const allResults = [];
+      
+      // Process domains one at a time
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
         try {
           const listing = await searchGMBListing(domain);
-          setResults(prev => [...prev, { domain, listing }]);
+          allResults.push({ domain, listing });
         } catch (error) {
           console.error(`Error checking domain ${domain}:`, error);
-          setResults(prev => [...prev, { domain, listing: null }]);
+          allResults.push({ domain, listing: null });
         }
         
         setProgress(((i + 1) / domainList.length) * 100);
       }
+
+      // Set all results at once when complete
+      setResults(allResults);
 
       toast({
         title: "Domain Check Complete",
