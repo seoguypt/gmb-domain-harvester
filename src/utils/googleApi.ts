@@ -46,10 +46,11 @@ export const initGoogleMapsApi = async (apiKey: string) => {
 };
 
 const cleanDomain = (domain: string): string => {
-  // Remove protocol, www, and TLD
+  // Remove protocol, www, trailing slashes, and TLD
   return domain.toLowerCase()
     .replace(/^https?:\/\//i, '')
     .replace(/^www\./i, '')
+    .replace(/\/+$/, '')  // Remove trailing slashes
     .replace(/\.[^/.]+$/, '');
 };
 
@@ -75,18 +76,22 @@ const cleanBusinessName = (domain: string): string => {
   return name.trim();
 };
 
-const extractDomainFromUrl = (url: string): string => {
-  try {
-    // Remove protocol and get domain
-    const domain = url.toLowerCase()
-      .replace(/^https?:\/\//i, '')
-      .replace(/^www\./i, '')
-      .split('/')[0];
-    return domain;
-  } catch (error) {
-    console.error('Error extracting domain from URL:', url);
-    return '';
-  }
+const normalizeDomain = (url: string): string => {
+  // Remove protocol, trailing slashes, and convert to lowercase
+  return url.toLowerCase()
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/+$/, '')  // Remove trailing slashes
+    .split('/')[0];       // Get just the domain part
+};
+
+const domainsMatch = (domain1: string, domain2: string): boolean => {
+  const norm1 = normalizeDomain(domain1);
+  const norm2 = normalizeDomain(domain2);
+  
+  // Compare with and without www
+  return norm1 === norm2 || 
+         `www.${norm1}` === norm2 || 
+         norm1 === `www.${norm2}`;
 };
 
 export const searchGMBListing = (domain: string): Promise<{
@@ -123,22 +128,20 @@ export const searchGMBListing = (domain: string): Promise<{
           },
           (place, detailsStatus) => {
             if (detailsStatus === google.maps.places.PlacesServiceStatus.OK && place) {
-              const placeWebsite = place.website?.toLowerCase() || '';
-              const placeDomain = extractDomainFromUrl(placeWebsite);
+              const placeWebsite = place.website || '';
               const businessNameLower = place.name?.toLowerCase() || '';
               
               console.log(`Comparing:
                 Input domain: ${domain}
                 Cleaned domain: ${cleanedDomain}
                 Place website: ${placeWebsite}
-                Place domain: ${placeDomain}
                 Place name: ${businessNameLower}
                 Cleaned name: ${cleanedName}`);
               
-              // Strict website match - domains must match exactly
-              const websiteMatch = placeDomain === domain.toLowerCase();
+              // Website match using the new flexible domain comparison
+              const websiteMatch = placeWebsite && domainsMatch(domain, placeWebsite);
               
-              // Strict name match - business name must contain the entire cleaned domain name
+              // Name match remains the same - must contain the entire cleaned domain name
               // or vice versa, and be at least 70% similar in length
               const nameMatch = (businessNameLower.includes(cleanedName) || 
                                cleanedName.includes(businessNameLower)) &&
