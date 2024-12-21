@@ -51,17 +51,17 @@ export function useDomainChecker() {
       .filter(d => d);
 
     try {
-      const BATCH_SIZE = 5; // Process 5 domains concurrently
+      const BATCH_SIZE = 20; // Process more domains concurrently with rate limiting
       const UPDATE_INTERVAL = 10000; // 10 seconds
       let processedCount = 0;
       let batchResults: { domain: string; listing: GMBListing | null; }[] = [];
       let lastUpdateTime = Date.now();
 
-      // Split domains into batches
+      // Process domains in batches
       for (let i = 0; i < domainList.length; i += BATCH_SIZE) {
-        const batch = domainList.slice(i, i + BATCH_SIZE);
+        const batch = domainList.slice(i, Math.min(i + BATCH_SIZE, domainList.length));
         
-        // Process batch concurrently
+        // Process batch concurrently - rate limiter in searchGMBListing handles the throttling
         const batchPromises = batch.map(async (domain) => {
           try {
             const listing = await searchGMBListing(domain);
@@ -73,18 +73,21 @@ export function useDomainChecker() {
         });
 
         // Wait for current batch to complete
-        const batchResults = await Promise.all(batchPromises);
-        processedCount += batchResults.length;
+        const currentBatchResults = await Promise.all(batchPromises);
+        processedCount += currentBatchResults.length;
+        batchResults.push(...currentBatchResults);
         
         // Update results if enough time has passed or this is the last batch
         const currentTime = Date.now();
         if (currentTime - lastUpdateTime >= UPDATE_INTERVAL || processedCount === domainList.length) {
           setResults(prev => [...prev, ...batchResults]);
+          batchResults = [];
           lastUpdateTime = currentTime;
         }
         
         setProgress((processedCount / domainList.length) * 100);
       }
+
       toast({
         title: "Domain Check Complete",
         description: `Checked ${domainList.length} domain${domainList.length === 1 ? '' : 's'}`,
