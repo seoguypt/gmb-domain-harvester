@@ -110,10 +110,10 @@ export function useDomainChecker() {
             console.log('Cache hit for domain:', domain);
             listing = cachedResult.listing;
             metrics = {
-              domain_rating: cachedResult.domain_rating,
-              semrush_rank: cachedResult.semrush_rank,
-              facebook_shares: cachedResult.facebook_shares,
-              ahrefs_rank: cachedResult.ahrefs_rank
+              domain_rating: cachedResult.domain_rating || 0,
+              semrush_rank: cachedResult.semrush_rank || 0,
+              facebook_shares: cachedResult.facebook_shares || 0,
+              ahrefs_rank: cachedResult.ahrefs_rank || 0
             };
           } else {
             console.log('Cache miss for domain:', domain);
