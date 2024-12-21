@@ -15,12 +15,13 @@ export const initGoogleMapsApi = async () => {
       .from('secrets')
       .select('value')
       .eq('name', 'GOOGLE_MAPS_API_KEY')
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error('Google Maps API key not found');
 
     const loader = new Loader({
-      apiKey: data.value || "",
+      apiKey: data.value,
       version: "weekly",
       libraries: ["places"]
     });
