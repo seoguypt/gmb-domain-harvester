@@ -8,8 +8,10 @@ export interface GMBListing {
   websiteUrl?: string;
 }
 
+type Library = 'places' | 'geometry' | 'drawing' | 'visualization';
+
 export interface GoogleMapsConfig {
   apiKey: string;
-  libraries: google.maps.Libraries;
+  libraries: Library[];
   version: string;
 }
