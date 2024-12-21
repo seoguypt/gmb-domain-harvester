@@ -100,15 +100,36 @@ export function DomainChecker() {
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
         let listing = null;
+        let domainRating = null;
         
         // If we have a cached result less than a week old, use it
         if (cachedCheck && new Date(cachedCheck.checked_at) > oneWeekAgo) {
           console.log(`Using cached result for ${domain}`);
           listing = cachedCheck.listing;
+          domainRating = cachedCheck.domain_rating;
         } else {
           // Otherwise, fetch new data
           try {
             listing = await searchGMBListing(domain);
+            
+            // Fetch domain rating from Ahrefs
+            try {
+              const ratingResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/getDomainRating`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                },
+                body: JSON.stringify({ domain }),
+              });
+              
+              if (ratingResponse.ok) {
+                const ratingData = await ratingResponse.json();
+                domainRating = ratingData.domain?.domain_rating;
+              }
+            } catch (error) {
+              console.error(`Error fetching domain rating for ${domain}:`, error);
+            }
             
             // Store or update the result in the database
             if (cachedCheck) {
@@ -116,6 +137,7 @@ export function DomainChecker() {
                 .from('domain_checks')
                 .update({ 
                   listing,
+                  domain_rating: domainRating,
                   checked_at: new Date().toISOString()
                 })
                 .eq('domain', domain);
@@ -125,6 +147,7 @@ export function DomainChecker() {
                 .insert({ 
                   domain,
                   listing,
+                  domain_rating: domainRating,
                   checked_at: new Date().toISOString()
                 });
             }
@@ -137,7 +160,8 @@ export function DomainChecker() {
           domain,
           listing,
           tld: domain.split('.').pop() || '',
-          domainAge: 'N/A'
+          domainAge: 'N/A',
+          domainRating
         });
         
         setProgress(((i + 1) / domainList.length) * 100);
