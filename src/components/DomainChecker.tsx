@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
-import { APIKeyInput } from "./domain-checker/APIKeyInput";
+import { APIKeys } from "./domain-checker/APIKeys";
 import { DomainInput } from "./domain-checker/DomainInput";
 import { BulkResults } from "./domain-checker/BulkResults";
 import { ProgressIndicator } from "./domain-checker/ProgressIndicator";
@@ -17,10 +17,11 @@ export function DomainChecker() {
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
-  const [apiKey, setApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
+  const [googleApiKey, setGoogleApiKey] = useState("AIzaSyDrdKNl-vB_wFSUIGfe-ipW2_o3YPZxrE4");
+  const [ahrefsApiKey, setAhrefsApiKey] = useState("");
 
   const initializeApi = async () => {
-    if (!apiKey) {
+    if (!googleApiKey) {
       toast({
         title: "API Key Required",
         description: "Please enter your Google Maps API key",
@@ -31,7 +32,7 @@ export function DomainChecker() {
 
     setIsInitializing(true);
     try {
-      await initGoogleMapsApi(apiKey);
+      await initGoogleMapsApi(googleApiKey);
       setIsApiInitialized(true);
       toast({
         title: "API Initialized",
@@ -112,23 +113,23 @@ export function DomainChecker() {
           try {
             listing = await searchGMBListing(domain);
             
-            // Fetch domain rating from Ahrefs
-            try {
-              const ratingResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/getDomainRating`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-                },
-                body: JSON.stringify({ domain }),
-              });
-              
-              if (ratingResponse.ok) {
-                const ratingData = await ratingResponse.json();
-                domainRating = ratingData.domain?.domain_rating;
+            // Fetch domain rating from Ahrefs if API key is provided
+            if (ahrefsApiKey) {
+              try {
+                const ratingResponse = await fetch(`https://api.ahrefs.com/v3/site-explorer/domain-rating?target=${encodeURIComponent(domain)}`, {
+                  headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${ahrefsApiKey}`
+                  }
+                });
+                
+                if (ratingResponse.ok) {
+                  const ratingData = await ratingResponse.json();
+                  domainRating = ratingData.domain?.domain_rating;
+                }
+              } catch (error) {
+                console.error(`Error fetching domain rating for ${domain}:`, error);
               }
-            } catch (error) {
-              console.error(`Error fetching domain rating for ${domain}:`, error);
             }
             
             // Store or update the result in the database
@@ -197,9 +198,11 @@ export function DomainChecker() {
           </div>
 
           <div className="space-y-4">
-            <APIKeyInput
-              apiKey={apiKey}
-              setApiKey={setApiKey}
+            <APIKeys
+              googleApiKey={googleApiKey}
+              setGoogleApiKey={setGoogleApiKey}
+              ahrefsApiKey={ahrefsApiKey}
+              setAhrefsApiKey={setAhrefsApiKey}
               isInitializing={isInitializing}
               onInitialize={initializeApi}
               isApiInitialized={isApiInitialized}
