@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { initGoogleMapsApi, searchGMBListing } from "@/utils/google";
 import { getCachedDomainCheck, updateDomainCache } from "@/utils/cache/domainCache";
 import type { DomainResult } from "@/utils/google/types";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useDomainChecker() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +12,20 @@ export function useDomainChecker() {
   const [progress, setProgress] = useState(0);
   const [isApiInitialized, setIsApiInitialized] = useState(false);
   const { toast } = useToast();
+
+  const fetchSeoData = async (domain: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetchSeoData', {
+        body: { domain }
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching SEO data:', error);
+      return null;
+    }
+  };
 
   const initializeApi = async (googleApiKey: string) => {
     if (!googleApiKey) {
@@ -81,14 +96,25 @@ export function useDomainChecker() {
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
         let listing = null;
+        let seoData = null;
         
         if (cachedCheck && new Date(cachedCheck.checked_at) > oneWeekAgo) {
           console.log(`Using cached result for ${domain}`);
           listing = cachedCheck.listing;
+          seoData = {
+            semrush_rank: cachedCheck.semrush_rank,
+            facebook_shares: cachedCheck.facebook_shares,
+            ahrefs_rank: cachedCheck.ahrefs_rank
+          };
         } else {
           try {
             listing = await searchGMBListing(domain);
-            await updateDomainCache(domain, { listing });
+            seoData = await fetchSeoData(domain);
+            await updateDomainCache(domain, { 
+              listing,
+              ...seoData,
+              processed_at: new Date().toISOString()
+            });
           } catch (error) {
             console.error(`Error checking domain ${domain}:`, error);
           }
@@ -98,7 +124,8 @@ export function useDomainChecker() {
           domain,
           listing,
           tld: domain.split('.').pop() || '',
-          domainAge: 'N/A'
+          domainAge: 'N/A',
+          ...seoData
         });
         
         setProgress(((i + 1) / domainList.length) * 100);
