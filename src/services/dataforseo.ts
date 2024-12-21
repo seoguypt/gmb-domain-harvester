@@ -17,11 +17,17 @@ export async function fetchDomainMetrics(domain: string) {
     
     console.log('Making DataForSEO request for domain:', domain);
     
-    const response = await fetch('https://api.dataforseo.com/v3/domain_analytics/whois/overview/live', {
+    // Use cors-anywhere proxy
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const apiUrl = 'https://api.dataforseo.com/v3/domain_analytics/whois/overview/live';
+    
+    const response = await fetch(proxyUrl + apiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': window.location.origin
       },
       body: JSON.stringify([{
         target: domain
