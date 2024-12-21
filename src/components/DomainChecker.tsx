@@ -20,6 +20,7 @@ export function DomainChecker() {
   const [listing, setListing] = useState<GMBListing | null>(null);
   const { toast } = useToast();
   const [isApiInitialized, setIsApiInitialized] = useState(false);
+  const [additionalField, setAdditionalField] = useState("");
 
   useEffect(() => {
     const init = async () => {
@@ -104,27 +105,36 @@ export function DomainChecker() {
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="space-y-4">
             <Input
-              placeholder="Enter domain (e.g., example.com)"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
+              placeholder="Additional field"
+              value={additionalField}
+              onChange={(e) => setAdditionalField(e.target.value)}
               className="text-lg"
-              disabled={isLoading || isInitializing}
             />
-            <Button
-              onClick={checkDomain}
-              disabled={isLoading || isInitializing}
-              className="min-w-[100px]"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : isInitializing ? (
-                "Initializing..."
-              ) : (
-                "Check"
-              )}
-            </Button>
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter domain (e.g., example.com)"
+                value={domain}
+                onChange={(e) => setDomain(e.target.value)}
+                className="text-lg"
+                disabled={isLoading || isInitializing}
+              />
+              <Button
+                onClick={checkDomain}
+                disabled={isLoading || isInitializing}
+                className="min-w-[100px]"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isInitializing ? (
+                  "Initializing..."
+                ) : (
+                  "Check"
+                )}
+              </Button>
+            </div>
           </div>
 
           {listing && (
