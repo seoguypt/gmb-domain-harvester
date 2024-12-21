@@ -15,6 +15,7 @@ export function BulkResults({ results }: BulkResultsProps) {
           <TableRow>
             <TableHead>Domain</TableHead>
             <TableHead>GMB Listing</TableHead>
+            <TableHead>Match Type</TableHead>
             <TableHead>Registration</TableHead>
             <TableHead>Domain Metrics</TableHead>
             <TableHead>Backlinks</TableHead>
@@ -58,6 +59,13 @@ export function BulkResults({ results }: BulkResultsProps) {
                   </HoverCard>
                 ) : (
                   <span className="text-muted-foreground">No</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {result.listing?.matchType ? (
+                  <span className="capitalize">{result.listing.matchType}</span>
+                ) : (
+                  <span className="text-muted-foreground">N/A</span>
                 )}
               </TableCell>
               <TableCell>
