@@ -19,7 +19,10 @@ export function useDomainChecker() {
         body: { domain }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching SEO data:', error);
+        return null;
+      }
       return data;
     } catch (error) {
       console.error('Error fetching SEO data:', error);
@@ -86,61 +89,75 @@ export function useDomainChecker() {
       .map(d => d.trim())
       .filter(d => d);
 
+    const totalDomains = domainList.length;
+    const newResults: DomainResult[] = [];
+
     try {
-      const newResults = [];
       for (let i = 0; i < domainList.length; i++) {
         const domain = domainList[i];
+        let result: DomainResult = {
+          domain,
+          listing: null,
+          tld: domain.split('.').pop() || '',
+          domainAge: 'N/A'
+        };
         
-        const cachedCheck = await getCachedDomainCheck(domain);
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        try {
+          const cachedCheck = await getCachedDomainCheck(domain);
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-        let listing = null;
-        let seoData = null;
-        
-        if (cachedCheck && new Date(cachedCheck.checked_at) > oneWeekAgo) {
-          console.log(`Using cached result for ${domain}`);
-          listing = cachedCheck.listing;
-          seoData = {
-            semrush_rank: cachedCheck.semrush_rank,
-            facebook_shares: cachedCheck.facebook_shares,
-            ahrefs_rank: cachedCheck.ahrefs_rank
-          };
-        } else {
-          try {
-            listing = await searchGMBListing(domain);
-            seoData = await fetchSeoData(domain);
-            await updateDomainCache(domain, { 
+          if (cachedCheck && new Date(cachedCheck.checked_at) > oneWeekAgo) {
+            console.log(`Using cached result for ${domain}`);
+            result = {
+              ...result,
+              listing: cachedCheck.listing,
+              semrush_rank: cachedCheck.semrush_rank,
+              facebook_shares: cachedCheck.facebook_shares,
+              ahrefs_rank: cachedCheck.ahrefs_rank
+            };
+          } else {
+            const [listing, seoData] = await Promise.all([
+              searchGMBListing(domain).catch(err => {
+                console.error(`Error searching GMB listing for ${domain}:`, err);
+                return null;
+              }),
+              fetchSeoData(domain).catch(err => {
+                console.error(`Error fetching SEO data for ${domain}:`, err);
+                return null;
+              })
+            ]);
+
+            result = {
+              ...result,
               listing,
-              ...seoData,
-              processed_at: new Date().toISOString()
+              ...(seoData || {})
+            };
+
+            // Update cache in background
+            updateDomainCache(domain, result).catch(err => {
+              console.error(`Error updating cache for ${domain}:`, err);
             });
-          } catch (error) {
-            console.error(`Error checking domain ${domain}:`, error);
           }
+        } catch (error) {
+          console.error(`Error processing domain ${domain}:`, error);
+          // Continue with next domain even if there's an error
         }
 
-        newResults.push({ 
-          domain,
-          listing,
-          tld: domain.split('.').pop() || '',
-          domainAge: 'N/A',
-          ...seoData
-        });
-        
-        setProgress(((i + 1) / domainList.length) * 100);
+        newResults.push(result);
+        setResults([...newResults]); // Update results immediately for each domain
+        setProgress(((i + 1) / totalDomains) * 100);
       }
-      
-      setResults(newResults);
+
       toast({
         title: "Domain Check Complete",
-        description: `Checked ${domainList.length} domain${domainList.length === 1 ? '' : 's'}`,
+        description: `Checked ${totalDomains} domain${totalDomains === 1 ? '' : 's'}`,
       });
     } catch (error) {
-      console.error("Error checking domains:", error);
+      console.error("Error in domain checking process:", error);
       toast({
         title: "Error checking domains",
-        description: "Unable to check GMB listings at this time.",
+        description: "Some domains may not have been checked properly.",
         variant: "destructive",
       });
     } finally {
