@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link, ExternalLink, BarChart } from 'lucide-react';
+import { Building2, MapPin, Star, Link, ExternalLink } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
 import type { DomainResult } from "@/utils/google/types";
 import { domainsMatch } from "@/utils/google/domainUtils";
@@ -30,10 +30,9 @@ export function BulkResults({ results }: BulkResultsProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-1/6">Domain</TableHead>
-              <TableHead className="w-1/4">GMB Listing</TableHead>
-              <TableHead className="w-1/6">Match Type</TableHead>
-              <TableHead className="w-1/4">SEO Metrics</TableHead>
+              <TableHead className="w-1/4">Domain</TableHead>
+              <TableHead className="w-1/3">GMB Listing</TableHead>
+              <TableHead className="w-1/4">Match Type</TableHead>
               <TableHead>Check</TableHead>
             </TableRow>
           </TableHeader>
@@ -109,44 +108,6 @@ export function BulkResults({ results }: BulkResultsProps) {
                       )}
                     </div>
                   )}
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-2">
-                    <HoverCard>
-                      <HoverCardTrigger asChild>
-                        <div className="flex items-center gap-2 cursor-help">
-                          <BarChart className="h-4 w-4 text-muted-foreground" />
-                          <div className="flex flex-col">
-                            {result.semrush_rank ? (
-                              <span className="text-sm">SR: {result.semrush_rank.toLocaleString()}</span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">SR: N/A</span>
-                            )}
-                            {result.facebook_shares ? (
-                              <span className="text-sm">FB: {result.facebook_shares.toLocaleString()}</span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">FB: N/A</span>
-                            )}
-                            {result.ahrefs_rank ? (
-                              <span className="text-sm">AR: {result.ahrefs_rank.toLocaleString()}</span>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">AR: N/A</span>
-                            )}
-                          </div>
-                        </div>
-                      </HoverCardTrigger>
-                      <HoverCardContent className="w-64">
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">SEO Metrics</p>
-                          <div className="space-y-1">
-                            <p className="text-sm">SemRush Rank: {result.semrush_rank?.toLocaleString() || 'N/A'}</p>
-                            <p className="text-sm">Facebook Shares: {result.facebook_shares?.toLocaleString() || 'N/A'}</p>
-                            <p className="text-sm">Ahrefs Rank: {result.ahrefs_rank?.toLocaleString() || 'N/A'}</p>
-                          </div>
-                        </div>
-                      </HoverCardContent>
-                    </HoverCard>
-                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1">

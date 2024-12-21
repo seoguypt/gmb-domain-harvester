@@ -14,7 +14,4 @@ export interface DomainResult {
   tld: string;
   domainAge: string;
   domainRating?: number;
-  semrush_rank?: number;
-  facebook_shares?: number;
-  ahrefs_rank?: number;
 }
