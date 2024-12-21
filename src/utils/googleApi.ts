@@ -39,9 +39,9 @@ export const searchGMBListing = (domain: string): Promise<{
       return;
     }
 
-    const request = {
+    const request: google.maps.places.TextSearchRequest = {
       query: domain.replace(/\.[^/.]+$/, ""), // Remove TLD
-      type: ['establishment']
+      type: 'establishment'
     };
 
     placesService.textSearch(request, (results, status) => {
