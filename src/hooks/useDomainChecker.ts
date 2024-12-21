@@ -50,12 +50,15 @@ export function useDomainChecker() {
         const metrics = data.tasks[0].result[0];
         console.log('DataForSEO metrics:', metrics);
         
-        return {
-          domain_rating: metrics.domain_rating || 0,
-          semrush_rank: metrics.semrush_rank || 0,
-          facebook_shares: metrics.facebook_shares || 0,
-          ahrefs_rank: metrics.ahrefs_rank || 0
-        };
+        // Return metrics if any value is non-zero
+        if (metrics.domain_rating || metrics.semrush_rank || metrics.facebook_shares || metrics.ahrefs_rank) {
+          return {
+            domain_rating: metrics.domain_rating || 0,
+            semrush_rank: metrics.semrush_rank || 0,
+            facebook_shares: metrics.facebook_shares || 0,
+            ahrefs_rank: metrics.ahrefs_rank || 0
+          };
+        }
       }
       return null;
     } catch (error) {
