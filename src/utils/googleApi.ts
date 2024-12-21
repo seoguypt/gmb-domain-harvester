@@ -1,4 +1,5 @@
 import { Loader } from "@googlemaps/js-api-loader";
+import { supabase } from "@/integrations/supabase/client";
 
 declare global {
   interface Window {
@@ -9,22 +10,35 @@ declare global {
 let placesService: google.maps.places.PlacesService | null = null;
 
 export const initGoogleMapsApi = async () => {
-  const loader = new Loader({
-    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-    version: "weekly",
-    libraries: ["places"]
-  });
+  try {
+    const { data, error } = await supabase
+      .from('secrets')
+      .select('value')
+      .eq('name', 'GOOGLE_MAPS_API_KEY')
+      .single();
 
-  await loader.load();
-  
-  // Create a dummy map (required for PlacesService)
-  const dummyDiv = document.createElement('div');
-  const map = new google.maps.Map(dummyDiv, {
-    center: { lat: 0, lng: 0 },
-    zoom: 1
-  });
-  
-  placesService = new google.maps.places.PlacesService(map);
+    if (error) throw error;
+
+    const loader = new Loader({
+      apiKey: data.value || "",
+      version: "weekly",
+      libraries: ["places"]
+    });
+
+    await loader.load();
+    
+    // Create a dummy map (required for PlacesService)
+    const dummyDiv = document.createElement('div');
+    const map = new google.maps.Map(dummyDiv, {
+      center: { lat: 0, lng: 0 },
+      zoom: 1
+    });
+    
+    placesService = new google.maps.places.PlacesService(map);
+  } catch (error) {
+    console.error('Error initializing Google Maps API:', error);
+    throw error;
+  }
 };
 
 export const searchGMBListing = (domain: string): Promise<{
