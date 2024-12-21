@@ -89,19 +89,47 @@ const cleanBusinessName = (domain: string): string => {
 };
 
 const normalizeDomain = (url: string): string => {
-  return url.toLowerCase()
+  if (!url) return '';
+  
+  let normalized = url.toLowerCase()
     .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
     .replace(/\/+$/, '')  // Remove trailing slashes
     .split('/')[0];       // Get just the domain part
+  
+  // Handle common redirects and alternative domains
+  normalized = normalized
+    .replace(/\.wordpress\.com$/, '')
+    .replace(/\.wixsite\.com$/, '')
+    .replace(/\.squarespace\.com$/, '')
+    .replace(/\.shopify\.com$/, '');
+    
+  console.log('Normalized domain:', normalized);
+  return normalized;
 };
 
 const domainsMatch = (domain1: string, domain2: string): boolean => {
+  if (!domain1 || !domain2) return false;
+  
   const norm1 = normalizeDomain(domain1);
   const norm2 = normalizeDomain(domain2);
   
-  return norm1 === norm2 || 
-         `www.${norm1}` === norm2 || 
-         norm1 === `www.${norm2}`;
+  console.log(`Comparing domains:
+    Domain 1: ${domain1} -> ${norm1}
+    Domain 2: ${domain2} -> ${norm2}`);
+  
+  // Check for exact match or www variants
+  const exactMatch = norm1 === norm2 || 
+                    `www.${norm1}` === norm2 || 
+                    norm1 === `www.${norm2}`;
+                    
+  // Check if one domain contains the other (for subdomains)
+  const containsMatch = norm1.includes(norm2) || norm2.includes(norm1);
+  
+  const result = exactMatch || containsMatch;
+  console.log('Match result:', result);
+  
+  return result;
 };
 
 export const searchGMBListing = (domain: string): Promise<{
@@ -151,10 +179,12 @@ export const searchGMBListing = (domain: string): Promise<{
               
               const websiteMatch = placeWebsite && domainsMatch(domain, placeWebsite);
               
-              const nameMatch = (businessNameLower.includes(cleanedName) || 
+              // Only check name match if no website match is found
+              const nameMatch = !websiteMatch && 
+                              (businessNameLower.includes(cleanedName) || 
                                cleanedName.includes(businessNameLower)) &&
-                               Math.min(businessNameLower.length, cleanedName.length) / 
-                               Math.max(businessNameLower.length, cleanedName.length) > 0.7;
+                              Math.min(businessNameLower.length, cleanedName.length) / 
+                              Math.max(businessNameLower.length, cleanedName.length) > 0.7;
               
               if (websiteMatch || nameMatch) {
                 console.log(`Match found! Type: ${websiteMatch ? 'website' : 'name'}`);
