@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Building2, MapPin, Star, Link, Globe } from 'lucide-react';
+import { Building2, MapPin, Star, Link } from 'lucide-react';
 import type { DomainResult } from "@/utils/google/types";
 import { domainsMatch } from "@/utils/google/domainUtils";
 
@@ -14,9 +14,9 @@ export function BulkResults({ results }: BulkResultsProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Domain</TableHead>
-            <TableHead>GMB Listing</TableHead>
-            <TableHead>Match Type</TableHead>
+            <TableHead className="w-1/4">Domain</TableHead>
+            <TableHead className="w-1/3">GMB Listing</TableHead>
+            <TableHead className="w-1/4">Match Type</TableHead>
             <TableHead>Domain Age</TableHead>
           </TableRow>
         </TableHeader>
@@ -69,17 +69,26 @@ export function BulkResults({ results }: BulkResultsProps) {
                 )}
               </TableCell>
               <TableCell>
-                {result.listing?.matchType ? (
-                  <span className={`px-2.5 py-1 rounded-full text-sm capitalize ${
-                    result.listing.matchType === 'website' 
-                      ? 'bg-[#F2FCE2] text-green-700'
-                      : 'bg-[#FEF7CD] text-amber-700'
-                  }`}>
-                    {result.listing.matchType === 'name' ? 'Name match' : result.listing.matchType}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">N/A</span>
-                )}
+                <div className="space-y-1">
+                  {result.listing?.matchType ? (
+                    <>
+                      <span className={`px-2.5 py-1 rounded-full text-sm capitalize ${
+                        result.listing.matchType === 'website' 
+                          ? 'bg-[#F2FCE2] text-green-700'
+                          : 'bg-[#FEF7CD] text-amber-700'
+                      }`}>
+                        {result.listing.matchType === 'name' ? 'Name match' : result.listing.matchType}
+                      </span>
+                      {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
+                        <div className="text-xs text-muted-foreground pl-1">
+                          Using domain: {result.listing.websiteUrl}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">N/A</span>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <span className="text-sm">
