@@ -1,59 +1,33 @@
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import { Link } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Home, Globe, Users } from "lucide-react";
 
 const MainMenu = () => {
   return (
     <div className="w-full bg-white/50 backdrop-blur-sm border-b mb-8">
       <div className="max-w-7xl mx-auto px-4">
-        <NavigationMenu className="py-2">
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>
-                <Menu className="w-4 h-4 mr-2" />
-                Menu
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid gap-3 p-4 w-[200px]">
-                  <Link
-                    to="/"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">Home</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      Domain Checker
-                    </p>
-                  </Link>
-                  <Link
-                    to="/found"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">Website Matches</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      Found Website Matches
-                    </p>
-                  </Link>
-                  <Link
-                    to="/name-matches"
-                    className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                  >
-                    <div className="text-sm font-medium leading-none">Name Matches</div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                      Found Name Matches
-                    </p>
-                  </Link>
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        <nav className="flex items-center gap-6 py-4">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            <Home className="w-4 h-4" />
+            <span>Domain Checker</span>
+          </Link>
+          <Link
+            to="/found"
+            className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            <Globe className="w-4 h-4" />
+            <span>Website Matches</span>
+          </Link>
+          <Link
+            to="/name-matches"
+            className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+          >
+            <Users className="w-4 h-4" />
+            <span>Name Matches</span>
+          </Link>
+        </nav>
       </div>
     </div>
   );
