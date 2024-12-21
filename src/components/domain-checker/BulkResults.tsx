@@ -38,7 +38,7 @@ export function BulkResults({ results }: BulkResultsProps) {
                   <HoverCard>
                     <HoverCardTrigger asChild>
                       <a 
-                        href={`https://search.google.com/local/details?q=${encodeURIComponent(result.listing.businessName)}&place_id=${result.listing.placeId}`}
+                        href={`https://www.google.com/maps/place/?q=place_id:${result.listing.placeId}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 text-primary cursor-pointer hover:underline"
