@@ -46,17 +46,20 @@ export function useDomainChecker() {
 
       console.log('DataForSEO function response:', data);
 
-      if (data?.tasks?.[0]?.result?.[0]) {
-        const metrics = data.tasks[0].result[0];
-        console.log('DataForSEO metrics:', metrics);
+      if (data?.tasks?.[0]?.result) {
+        // Find the most recent result for this domain
+        const domainResult = data.tasks[0].result.find(r => 
+          r.metadata?.target === domain || 
+          r.metadata?.domain === domain
+        );
         
-        // Return metrics if any value is non-zero
-        if (metrics.domain_rating || metrics.semrush_rank || metrics.facebook_shares || metrics.ahrefs_rank) {
+        if (domainResult?.metadata) {
+          console.log('DataForSEO metrics:', domainResult.metadata);
           return {
-            domain_rating: metrics.domain_rating || 0,
-            semrush_rank: metrics.semrush_rank || 0,
-            facebook_shares: metrics.facebook_shares || 0,
-            ahrefs_rank: metrics.ahrefs_rank || 0
+            domain_rating: domainResult.metadata.domain_rank || domainResult.metadata.trust_score || 0,
+            semrush_rank: domainResult.metadata.semrush?.rank || domainResult.metadata.rank_absolute || 0,
+            facebook_shares: domainResult.metadata.social_metrics?.facebook?.shares || 0,
+            ahrefs_rank: domainResult.metadata.backlinks?.count || 0
           };
         }
       }
