@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { MapPin, Building2, Star, Loader2 } from "lucide-react";
+import { initGoogleMapsApi, searchGMBListing } from "@/utils/googleApi";
 
 interface GMBListing {
   businessName: string;
@@ -17,6 +18,24 @@ export function DomainChecker() {
   const [isLoading, setIsLoading] = useState(false);
   const [listing, setListing] = useState<GMBListing | null>(null);
   const { toast } = useToast();
+  const [isApiInitialized, setIsApiInitialized] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await initGoogleMapsApi();
+        setIsApiInitialized(true);
+      } catch (error) {
+        console.error("Failed to initialize Google Maps API:", error);
+        toast({
+          title: "API Initialization Error",
+          description: "Failed to initialize Google Maps API. Please try again later.",
+          variant: "destructive",
+        });
+      }
+    };
+    init();
+  }, [toast]);
 
   const checkDomain = async () => {
     if (!domain) {
@@ -28,27 +47,34 @@ export function DomainChecker() {
       return;
     }
 
+    if (!isApiInitialized) {
+      toast({
+        title: "API Not Ready",
+        description: "Please wait for the API to initialize",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     setListing(null);
 
     try {
-      // Simulated API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      
-      // Mock data - replace with actual API response
-      const mockListing: GMBListing = {
-        businessName: "Example Business",
-        address: "123 Business St, City, Country",
-        rating: 4.5,
-        type: "Local Business",
-      };
-      
-      setListing(mockListing);
-      toast({
-        title: "GMB Listing Found!",
-        description: "We found an active GMB listing for this domain.",
-      });
+      const result = await searchGMBListing(domain);
+      if (result) {
+        setListing(result);
+        toast({
+          title: "GMB Listing Found!",
+          description: "We found an active GMB listing for this domain.",
+        });
+      } else {
+        toast({
+          title: "No GMB Listing Found",
+          description: "We couldn't find a GMB listing for this domain.",
+        });
+      }
     } catch (error) {
+      console.error("Error checking domain:", error);
       toast({
         title: "Error checking domain",
         description: "Unable to check GMB listing at this time.",
