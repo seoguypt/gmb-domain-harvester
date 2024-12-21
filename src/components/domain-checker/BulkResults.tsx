@@ -78,26 +78,22 @@ export function BulkResults({ results }: BulkResultsProps) {
                 )}
               </TableCell>
               <TableCell>
-                <div className="space-y-1">
-                  {result.listing?.matchType ? (
-                    <>
-                      <span className={`px-2.5 py-1 rounded-full text-sm capitalize ${
-                        result.listing.matchType === 'website' 
-                          ? 'bg-[#F2FCE2] text-green-700'
-                          : 'bg-[#FEF7CD] text-amber-700'
-                      }`}>
-                        {result.listing.matchType === 'name' ? 'Name match' : result.listing.matchType}
-                      </span>
-                      {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
-                        <div className="text-xs text-muted-foreground pl-1">
-                          Using domain: {result.listing.websiteUrl}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">N/A</span>
-                  )}
-                </div>
+                {result.listing?.matchType && (
+                  <div className="space-y-1">
+                    <span className={`px-2.5 py-1 rounded-full text-sm capitalize ${
+                      result.listing.matchType === 'website' 
+                        ? 'bg-[#F2FCE2] text-green-700'
+                        : 'bg-[#FEF7CD] text-amber-700'
+                    }`}>
+                      {result.listing.matchType === 'name' ? 'Name match' : result.listing.matchType}
+                    </span>
+                    {result.listing.matchType === 'name' && result.listing.websiteUrl && !domainsMatch(result.domain, result.listing.websiteUrl) && (
+                      <div className="text-xs text-muted-foreground pl-1">
+                        Using domain: {result.listing.websiteUrl}
+                      </div>
+                    )}
+                  </div>
+                )}
               </TableCell>
               <TableCell>
                 <span className="text-sm">
